@@ -5,7 +5,13 @@
 #include <SDL_opengl.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+
 #include <iostream>
+#include <chrono>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 static bool handleEvents(SDL_Event event, SDL_Window* window){
     switch(event.type){
@@ -30,20 +36,22 @@ static bool handleEvents(SDL_Event event, SDL_Window* window){
 
 // Shaders
 const char *vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec3 aPos;\n"
+"layout (location = 0) in vec2 aPos;\n"
+"uniform mat4 trans;\n"
 "void main()\n"
 "{\n"
-" gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+" gl_Position = trans * vec4(aPos.x, aPos.y, 0.0f, 1.0f);\n"
 "}\0";
 
 const char *fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
 "void main()\n"
 "{\n"
-"FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"FragColor = vec4(0.5f, 0.6f, 1.0f, 1.0f);\n"
 "}\0";
 
 int main(int argc, char* argv[]){
+    auto t_start = std::chrono::high_resolution_clock::now();
     // Window dimensions
     const int winWidth = 640;
     const int winHeight = 480;
@@ -96,17 +104,15 @@ int main(int argc, char* argv[]){
     SDL_Event event;
 
     float vertices[] = {
-        -0.05f, 0.0f, 0.0f,
-        0.05f, 0.05f, 0.0f,
-        0.025f, 0.0f, 0.0f,
-        0.05f, -0.05f, 0.0f,
-        -0.05f, 0.0f, 0.0f
+        0.05f,0.0f,  // Front of ship
+        -0.05f, 0.05f, // Rear right
+        -0.025f, 0.0f, // Rear centre
+        -0.05f, -0.05f // Rear left
     };
 
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);// note last arg!
+    GLuint elements[] = {0,1,2,3,0};
+
+
 
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -156,20 +162,31 @@ int main(int argc, char* argv[]){
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+
+
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
 
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO); // Bind VBO after VAO!
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // to do: element buffer object so 'tip' is not repeated; 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO); // Bind EBO
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+
+
+    GLint uniTrans = glGetUniformLocation(shaderProgram, "trans");
 
     while (!quit){
+        
         // Handle event queue
         while (SDL_PollEvent(&event)){
             quit = handleEvents(event, window);
@@ -190,7 +207,23 @@ int main(int argc, char* argv[]){
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
-        glDrawArrays(GL_LINE_STRIP, 0, 5);
+        //glDrawArrays(GL_LINE_STRIP, 0, 5);
+
+        // rotation
+       // Calculate transformation
+        auto t_now = std::chrono::high_resolution_clock::now();
+        float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_start).count();
+
+        glm::mat4 trans = glm::mat4(1.0f);
+        trans = glm::rotate(
+            trans,
+            time * glm::radians(180.0f),
+            glm::vec3(0.0f, 0.0f, 1.0f)
+        );
+        glUniformMatrix4fv(uniTrans, 1, GL_FALSE, glm::value_ptr(trans));
+
+
+        glDrawElements(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0);
 
         // Swap buffers
         SDL_GL_SwapWindow(window);
