@@ -1,2 +1,4 @@
-*.c linguist-language=cpp
-*.h linguist-language=cpp
+# Vendored paths/files
+include/KHR/* linguist-vendored
+incude/glad/* linguist-vendored
+src/glad.c -linguist-vendored
