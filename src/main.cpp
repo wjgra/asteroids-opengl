@@ -8,10 +8,23 @@
 
 #include <iostream>
 #include <chrono>
+#include <fstream>
+#include <string>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
+__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+
+#ifdef __cplusplus
+}
+#endif
 
 static bool handleEvents(SDL_Event event, SDL_Window* window){
     switch(event.type){
@@ -34,7 +47,27 @@ static bool handleEvents(SDL_Event event, SDL_Window* window){
     return false;
 }
 
+std::string readFile(const char *filePath) {
+    std::string content;
+    std::ifstream fileStream(filePath, std::ios::in);
+
+    if(!fileStream.is_open()) {
+        std::cerr << "Could not read file " << filePath << ". File does not exist." << std::endl;
+        return "";
+    }
+
+    std::string line = "";
+    while(!fileStream.eof()) {
+        std::getline(fileStream, line);
+        content.append(line + "\n");
+    }
+
+    fileStream.close();
+    return content;
+}
+
 // Shaders
+/*
 const char *vertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec2 aPos;\n"
 "uniform mat4 trans;\n"
@@ -49,12 +82,14 @@ const char *fragmentShaderSource = "#version 330 core\n"
 "{\n"
 "FragColor = vec4(0.5f, 0.6f, 1.0f, 1.0f);\n"
 "}\0";
+*/
 
 int main(int argc, char* argv[]){
     auto t_start = std::chrono::high_resolution_clock::now();
     // Window dimensions
     const int winWidth = 640;
     const int winHeight = 480;
+    
 
     SDL_Window* window = nullptr;
     //SDL_Renderer* renderer = nullptr;
@@ -100,18 +135,38 @@ int main(int argc, char* argv[]){
     // Set viewport size
     glViewport(0, 0, winWidth, winHeight);
 
+    //float aspectRatio = float(winWidth)/float(winHeight);
+    
+
+
     bool quit = false;
     SDL_Event event;
 
     float vertices[] = {
-        0.05f,0.0f,  // Front of ship
-        -0.05f, 0.05f, // Rear right
-        -0.025f, 0.0f, // Rear centre
-        -0.05f, -0.05f // Rear left
+        1.0f, 0.5f,  // Front of ship
+        0.0f, 1.0f, // Rear right
+        0.25f, 0.5f, // Rear centre
+        0.0f, 0.0f // Rear left
     };
+    
+    float shipScale = float(winWidth)/40;
+
+    /*
+    // covert to screen space coords
+    for (int i = 0; i < 4; ++i){
+        vertices[2*i] = winWidth*(vertices[2*i]+1)/2; //x coord
+        vertices[2*i+1] = winHeight*(vertices[2*i+1]+1)/2; //y coord
+    }*/
+    
 
     GLuint elements[] = {0,1,2,3,0};
 
+
+    std::string vertShaderStr = readFile(".//shaders//vertex.vert");
+    std::string fragShaderStr = readFile(".//shaders//fragment.frag");
+
+    const char *vertexShaderSource = vertShaderStr.c_str();
+    const char *fragmentShaderSource = fragShaderStr.c_str();
 
 
     unsigned int vertexShader;
@@ -162,8 +217,6 @@ int main(int argc, char* argv[]){
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-
-
     unsigned int VBO;
     glGenBuffers(1, &VBO);
     
@@ -183,7 +236,12 @@ int main(int argc, char* argv[]){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
 
-    GLint uniTrans = glGetUniformLocation(shaderProgram, "trans");
+    GLint uniformModelTrans = glGetUniformLocation(shaderProgram, "model");
+    GLint uniformProjTrans = glGetUniformLocation(shaderProgram, "projection");
+
+    glm::mat4 projection = glm::ortho(0.0f, (float)winWidth, (float)winHeight,0.0f, -1.0f, 1.0f); 
+
+    glm::vec3 shipPos = glm::vec3(winWidth/2.0f, winHeight/2.0f, 0.0f);
 
     while (!quit){
         
@@ -215,12 +273,14 @@ int main(int argc, char* argv[]){
         float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_start).count();
 
         glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::rotate(
-            trans,
-            time * glm::radians(180.0f),
-            glm::vec3(0.0f, 0.0f, 1.0f)
-        );
-        glUniformMatrix4fv(uniTrans, 1, GL_FALSE, glm::value_ptr(trans));
+        trans = glm::translate(trans, shipPos);
+        trans = glm::translate(trans, glm::vec3(0.5*shipScale, 0.5*shipScale, 0.0));
+        trans = glm::rotate(trans, time * glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        trans = glm::translate(trans, glm::vec3(-0.5*shipScale, -0.5*shipScale, 0.0));
+        trans = glm::scale(trans, glm::vec3(shipScale, shipScale, shipScale));
+
+        glUniformMatrix4fv(uniformProjTrans, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
 
 
         glDrawElements(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0);
