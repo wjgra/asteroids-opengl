@@ -1,7 +1,7 @@
 #include "../include/shader_program.hpp"
 
-// Ideally move file reading out of the constructor
-ShaderProgram::ShaderProgram(const char* vertexPath, const char* fragmentPath){
+// To do: move file reading out of the constructor
+ShaderProgram::ShaderProgram(const std::string vertexPath, const std::string fragmentPath){
     std::string vertexSource, fragmentSource;
     std::ifstream vertexFile, fragmentFile;
 
@@ -9,8 +9,8 @@ ShaderProgram::ShaderProgram(const char* vertexPath, const char* fragmentPath){
     fragmentFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     try 
     {
-        vertexFile.open(vertexPath);
-        fragmentFile.open(fragmentPath);
+        vertexFile.open(vertexPath.c_str());
+        fragmentFile.open(fragmentPath.c_str());
         std::stringstream vertexStream, fragmentStream;
 
         vertexStream << vertexFile.rdbuf();
@@ -35,37 +35,41 @@ ShaderProgram::ShaderProgram(const char* vertexPath, const char* fragmentPath){
     glAttachShader(programID, vertexShaderID);
     glAttachShader(programID, fragmentShaderID);
     glLinkProgram(programID);
-    
-    int success;
+
+    int success, logLength;
     glGetProgramiv(programID, GL_LINK_STATUS, &success);
-    if(!success) {
-        char infoLog[512];
-        glGetProgramInfoLog(programID, 512, NULL, infoLog);
-        std::cout << "Failed to link shader program.\n" << infoLog << std::endl;
+    if(!success)
+    {
+        glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &logLength);
+        std::vector<char> errorLog((logLength > 1)? logLength : 1);
+        glGetProgramInfoLog(programID, logLength, NULL, errorLog.data());
+        std::cout << "Failed to link shader program.\n" << errorLog.data() << std::endl;
     }
+
     glDeleteShader(vertexShaderID);
     glDeleteShader(fragmentShaderID);
 }
 
 GLuint ShaderProgram::compileShader(const char *source, GLenum shaderType){
+    // Compile shader from source
     unsigned int shaderID;
     shaderID = glCreateShader(shaderType);
     glShaderSource(shaderID, 1, &source, NULL);
     glCompileShader(shaderID);
-    // check for errors compiling shader...
-    int success;
-    char infoLog[512];
+    // Check for errors in compiling shader
+    int success, logLength;
     glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
     if(!success)
     {
-        glGetShaderInfoLog(shaderID, 512, NULL, infoLog);
-        std::cout << "Shader at " << source << " failed to compile.\n" << infoLog << std::endl;
+        glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &logLength);
+        std::vector<char> errorLog((logLength > 1)? logLength : 1);
+        glGetShaderInfoLog(shaderID, logLength, NULL, errorLog.data());
+        std::cout << "Shader at " << source << " failed to compile.\n" << errorLog.data() << std::endl;
     }
     return shaderID;
 }
 
 ShaderProgram::~ShaderProgram(){
-
 }
 
 GLuint ShaderProgram::getID() const{
@@ -76,16 +80,6 @@ void ShaderProgram::useProgram(){
     glUseProgram(programID);
 }
 
-
-// overload these instead
-void ShaderProgram::setUniformBool(const std::string &name, bool value) const{
-    
-}
-
-void ShaderProgram::setUniformInt(const std::string &name, int value) const{
-
-}  
-
-void ShaderProgram::setUniformFloat(const std::string &name, float value) const{
-
+GLint ShaderProgram::getUniformLocation(const std::string &name) const{
+    return glGetUniformLocation(programID, name.c_str());
 }

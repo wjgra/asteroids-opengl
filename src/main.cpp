@@ -18,15 +18,6 @@
 
 #include "../include/shader_program.hpp"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-__declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
-__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-#ifdef __cplusplus
-}
-#endif
-
 static bool handleEvents(SDL_Event event, SDL_Window* window){
     switch(event.type){
         case SDL_QUIT:
@@ -148,8 +139,8 @@ int main(int argc, char* argv[]){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
 
-    GLint uniformModelTrans = glGetUniformLocation(shipShader.getID(), "model");
-    GLint uniformProjTrans = glGetUniformLocation(shipShader.getID(), "projection");
+    GLint uniformModelTrans = shipShader.getUniformLocation("model");
+    GLint uniformProjTrans = shipShader.getUniformLocation("projection");
 
     glm::mat4 projection = glm::ortho(0.0f, (float)winWidth, (float)winHeight,0.0f, -1.0f, 1.0f); 
 

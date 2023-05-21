@@ -7,18 +7,19 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <vector>
+//#include <algorithm>
   
 
 class ShaderProgram
 {
 public:
-    ShaderProgram(const char* vertexPath, const char* fragmentPath);
+    ShaderProgram(const std::string vertexPath, const std::string fragmentPath);
     ~ShaderProgram();
     GLuint getID() const;
     void useProgram();
-    void setUniformBool(const std::string &name, bool value) const;  
-    void setUniformInt(const std::string &name, int value) const;   
-    void setUniformFloat(const std::string &name, float value) const;
+    // Overloaded functions to set uniform values
+    GLint getUniformLocation(const std::string &name) const;
 private:
     GLuint programID;
     GLuint compileShader(const char *source, GLenum shaderType);
