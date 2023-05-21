@@ -1,7 +1,8 @@
+#include "../include/glad/glad.h"
+
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <SDL_main.h> //only include in main.cpp
-#include "../include/glad/glad.h"
 #include <SDL_opengl.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -15,13 +16,13 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "../include/shader_program.hpp"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 __declspec(dllexport) unsigned long NvOptimusEnablement = 0x00000001;
 __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
-
 #ifdef __cplusplus
 }
 #endif
@@ -46,43 +47,6 @@ static bool handleEvents(SDL_Event event, SDL_Window* window){
     // Return false if input does not trigger quit
     return false;
 }
-
-std::string readFile(const char *filePath) {
-    std::string content;
-    std::ifstream fileStream(filePath, std::ios::in);
-
-    if(!fileStream.is_open()) {
-        std::cerr << "Could not read file " << filePath << ". File does not exist." << std::endl;
-        return "";
-    }
-
-    std::string line = "";
-    while(!fileStream.eof()) {
-        std::getline(fileStream, line);
-        content.append(line + "\n");
-    }
-
-    fileStream.close();
-    return content;
-}
-
-// Shaders
-/*
-const char *vertexShaderSource = "#version 330 core\n"
-"layout (location = 0) in vec2 aPos;\n"
-"uniform mat4 trans;\n"
-"void main()\n"
-"{\n"
-" gl_Position = trans * vec4(aPos.x, aPos.y, 0.0f, 1.0f);\n"
-"}\0";
-
-const char *fragmentShaderSource = "#version 330 core\n"
-"out vec4 FragColor;\n"
-"void main()\n"
-"{\n"
-"FragColor = vec4(0.5f, 0.6f, 1.0f, 1.0f);\n"
-"}\0";
-*/
 
 int main(int argc, char* argv[]){
     auto t_start = std::chrono::high_resolution_clock::now();
@@ -161,61 +125,9 @@ int main(int argc, char* argv[]){
 
     GLuint elements[] = {0,1,2,3,0};
 
+    ShaderProgram shipShader(".//shaders//vertex.vert", ".//shaders//fragment.frag");
 
-    std::string vertShaderStr = readFile(".//shaders//vertex.vert");
-    std::string fragShaderStr = readFile(".//shaders//fragment.frag");
-
-    const char *vertexShaderSource = vertShaderStr.c_str();
-    const char *fragmentShaderSource = fragShaderStr.c_str();
-
-
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    // check for errors compiling shader...
-    int success;
-    char infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "Vertex shader failed to compile\n" <<
-        infoLog << std::endl;
-    }
-
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    // check for errors compiling shader...
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "Fragment shader failed to compile\n" <<
-        infoLog << std::endl;
-    }
-
-    // Link shaders into shader program
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-    
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    //check for errors...
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if(!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "Shader program failed to compile\n" <<
-        infoLog << std::endl;
-    }
-
-    glUseProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    shipShader.useProgram();
 
     unsigned int VBO;
     glGenBuffers(1, &VBO);
@@ -236,8 +148,8 @@ int main(int argc, char* argv[]){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
 
-    GLint uniformModelTrans = glGetUniformLocation(shaderProgram, "model");
-    GLint uniformProjTrans = glGetUniformLocation(shaderProgram, "projection");
+    GLint uniformModelTrans = glGetUniformLocation(shipShader.getID(), "model");
+    GLint uniformProjTrans = glGetUniformLocation(shipShader.getID(), "projection");
 
     glm::mat4 projection = glm::ortho(0.0f, (float)winWidth, (float)winHeight,0.0f, -1.0f, 1.0f); 
 
@@ -263,7 +175,7 @@ int main(int argc, char* argv[]){
         glClearColor(0.f, 0.f, 0.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        shipShader.useProgram();
         glBindVertexArray(VAO);
         //glDrawArrays(GL_LINE_STRIP, 0, 5);
 
