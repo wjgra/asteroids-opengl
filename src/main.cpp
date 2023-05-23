@@ -42,6 +42,8 @@ static bool handleEvents(SDL_Event event, SDL_Window* window){
 
 int main(int argc, char* argv[]){
     
+    int winScale = 2;
+
     // Window dimensions
     const int winWidth = 640;
     const int winHeight = 480;
@@ -67,7 +69,7 @@ int main(int argc, char* argv[]){
 
     Uint32 winFlags = SDL_WINDOW_OPENGL;// | SDL_WINDOW_RESIZABLE;
     bool fullScreen = false;
-    window = SDL_CreateWindow("Asteroids", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winWidth, winHeight, winFlags);
+    window = SDL_CreateWindow("Asteroids", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, winScale*winWidth, winScale*winHeight, winFlags);
 
     if (!window){
         std::cout << "Failed to create window\n";
@@ -89,7 +91,7 @@ int main(int argc, char* argv[]){
     SDL_GL_SetSwapInterval(useVsync);
 
     // Set viewport size
-    glViewport(0, 0, winWidth, winHeight);
+    glViewport(0, 0, winScale*winWidth, winScale*winHeight);
 
     //float aspectRatio = float(winWidth)/float(winHeight);
     
@@ -152,7 +154,7 @@ int main(int argc, char* argv[]){
         
         // Handle event queue
         while (SDL_PollEvent(&event)){
-            quit = handleEvents(event, window);
+            quit = handleEvents(event, window);// consider passing reference to struct with all app objects in
             if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_TAB){
                 fullScreen = !fullScreen;
                 if (fullScreen){
@@ -161,6 +163,24 @@ int main(int argc, char* argv[]){
                 else{
                     SDL_SetWindowFullscreen(window, winFlags);
                 }
+            }
+            if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_LEFT){
+                ship.turnLeft(true);//turningLeft = true;
+            }
+            if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RIGHT){
+                ship.turnRight(true);//turningRight= true;
+            }
+            if (event.type == SDL_KEYUP && event.key.keysym.scancode == SDL_SCANCODE_LEFT){
+                ship.turnLeft(false);//turningLeft = true;
+            }
+            if (event.type == SDL_KEYUP && event.key.keysym.scancode == SDL_SCANCODE_RIGHT){
+                ship.turnRight(false);//turningRight= true;
+            }
+            if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_UP){
+                ship.thrustForward(true);
+            }
+            if (event.type == SDL_KEYUP && event.key.keysym.scancode == SDL_SCANCODE_UP){
+                ship.thrustForward(false);
             }
         }
 
@@ -190,7 +210,26 @@ int main(int argc, char* argv[]){
 
         // consider changing to float...
         unsigned int frameTime = std::chrono::duration_cast<std::chrono::microseconds>(t_now-t_start).count();
+        if (frameTime > 250000){
+            frameTime = 250000; // cap frame rate to 250 ms in case of lag
+            std::cout << "Capped frameTime\n";
+        }
+
         t_start = t_now;
+
+        // temp - this is not correct, as updates with frameTime, not physics...
+        /*float factor = 3.0f;
+        if (turningLeft){
+            ship.changeOrientation(-2.0f*3.1415926535897932385f*factor*frameTime/1000000.0f);
+            turningLeft = false;
+        }
+        if (turningRight){
+            ship.changeOrientation(2.0f*3.1415926535897932385f*factor*frameTime/1000000.0f);
+            turningRight = false;
+        }*/
+
+        // end temp
+
         glm::mat4 trans = ship.getTransMatrix(frameTime);
 
         glUniformMatrix4fv(uniformProjTrans, 1, GL_FALSE, glm::value_ptr(projection));

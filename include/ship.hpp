@@ -16,16 +16,19 @@ public:
     void show();
     void hide();
     bool isVisible();
-    void changeOrientation(float delta);
+    void changeOrientation(float delta); // consider setOrientation
     float getOrientation();
     glm::mat4 getTransMatrix(unsigned int frameTime);
     void updateNextPos();
+    void turnLeft(bool);
+    void turnRight(bool);
+    void thrustForward(bool);
 private:
     static float vertices[];
-    float scale, posX, posY, velocityX, velocityY, orientation;
+    float scale, posX, posY, velocityX, velocityY, orientation, nextOrientation;
     float nextPosX, nextPosY, nextVelocityX, nextVelocityY;
     //glm::mat4 transformation;
-    bool visible, isThrusting;
+    bool visible, isThrusting, isTurningLeft, isTurningRight;
     unsigned int timeSinceLastUpdate;
 
 };
