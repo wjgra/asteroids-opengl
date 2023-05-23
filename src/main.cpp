@@ -17,6 +17,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "../include/shader_program.hpp"
+#include "../include/ship.hpp"
 
 static bool handleEvents(SDL_Event event, SDL_Window* window){
     switch(event.type){
@@ -40,7 +41,7 @@ static bool handleEvents(SDL_Event event, SDL_Window* window){
 }
 
 int main(int argc, char* argv[]){
-    auto t_start = std::chrono::high_resolution_clock::now();
+    
     // Window dimensions
     const int winWidth = 640;
     const int winHeight = 480;
@@ -106,12 +107,6 @@ int main(int argc, char* argv[]){
     
     float shipScale = float(winWidth)/40;
 
-    /*
-    // covert to screen space coords
-    for (int i = 0; i < 4; ++i){
-        vertices[2*i] = winWidth*(vertices[2*i]+1)/2; //x coord
-        vertices[2*i+1] = winHeight*(vertices[2*i+1]+1)/2; //y coord
-    }*/
     
 
     GLuint elements[] = {0,1,2,3,0};
@@ -144,7 +139,14 @@ int main(int argc, char* argv[]){
 
     glm::mat4 projection = glm::ortho(0.0f, (float)winWidth, (float)winHeight,0.0f, -1.0f, 1.0f); 
 
+
+    Ship ship(shipScale, winWidth/2.0f, winHeight/2.0f);
+    ship.updateNextPos();
+
+
     glm::vec3 shipPos = glm::vec3(winWidth/2.0f, winHeight/2.0f, 0.0f);
+
+    auto t_start = std::chrono::high_resolution_clock::now();
 
     while (!quit){
         
@@ -172,7 +174,8 @@ int main(int argc, char* argv[]){
 
         // rotation
        // Calculate transformation
-        auto t_now = std::chrono::high_resolution_clock::now();
+       
+       /* auto t_now = std::chrono::high_resolution_clock::now();
         float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_start).count();
 
         glm::mat4 trans = glm::mat4(1.0f);
@@ -181,6 +184,14 @@ int main(int argc, char* argv[]){
         trans = glm::rotate(trans, time * glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         trans = glm::translate(trans, glm::vec3(-0.5*shipScale, -0.5*shipScale, 0.0));
         trans = glm::scale(trans, glm::vec3(shipScale, shipScale, shipScale));
+        */
+
+        auto t_now = std::chrono::high_resolution_clock::now();
+
+        // consider changing to float...
+        unsigned int frameTime = std::chrono::duration_cast<std::chrono::microseconds>(t_now-t_start).count();
+        t_start = t_now;
+        glm::mat4 trans = ship.getTransMatrix(frameTime);
 
         glUniformMatrix4fv(uniformProjTrans, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
