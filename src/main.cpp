@@ -94,22 +94,18 @@ int main(int argc, char* argv[]){
     glViewport(0, 0, winScale*winWidth, winScale*winHeight);
 
     //float aspectRatio = float(winWidth)/float(winHeight);
-    
-
 
     bool quit = false;
     SDL_Event event;
 
     float vertices[] = {
-        1.0f, 0.5f,  // Front of ship
-        0.0f, 1.0f, // Rear right
-        0.25f, 0.5f, // Rear centre
-        0.0f, 0.0f // Rear left
+        0.5f, 0.0f,  // Front of ship
+        -0.5f, 0.5f, // Rear right
+        -0.25f, 0.0f, // Rear centre
+        -0.5f, -0.5f // Rear left
     };
     
     float shipScale = float(winWidth)/40;
-
-    
 
     GLuint elements[] = {0,1,2,3,0};
 
@@ -150,6 +146,26 @@ int main(int argc, char* argv[]){
 
     auto t_start = std::chrono::high_resolution_clock::now();
 
+    glm::vec2 translations[9] = {
+        glm::vec2(0.0f, 0.0f), // Centre
+        glm::vec2((float)winWidth, 0.0f), // E
+        glm::vec2((float)winWidth, (float)winHeight), // NE
+        glm::vec2(0.0f, (float)winHeight), // N
+        glm::vec2(-(float)winWidth, (float)winHeight), // NW
+        glm::vec2(-(float)winWidth, 0.0f), // W
+        glm::vec2(-(float)winWidth, -(float)winHeight), // SW
+        glm::vec2(0.0f , -(float)winHeight), // S
+        glm::vec2((float)winWidth, -(float)winHeight) //SE
+    };
+
+    shipShader.useProgram();
+    for (int i = 0; i < 9; ++i){
+        GLint offsetLocation = shipShader.getUniformLocation("offsets["+std::to_string(i)+"]");
+        glUniform2fv(offsetLocation,1,glm::value_ptr(translations[i]));
+    }
+    
+    float accumulatedFrameTime = 0.0f;
+    unsigned int numFrames = 0;
     while (!quit){
         
         // Handle event queue
@@ -210,9 +226,20 @@ int main(int argc, char* argv[]){
 
         // consider changing to float...
         unsigned int frameTime = std::chrono::duration_cast<std::chrono::microseconds>(t_now-t_start).count();
+        accumulatedFrameTime += frameTime;
+        ++numFrames;
+
         if (frameTime > 250000){
             frameTime = 250000; // cap frame rate to 250 ms in case of lag
             std::cout << "Capped frameTime\n";
+        }
+
+        if (accumulatedFrameTime > 1000000){ // every second
+            float avgFrameTime = accumulatedFrameTime / ((float)numFrames*1000.0f); // in ms
+            int FPS = int(1000.0f/avgFrameTime);
+            SDL_SetWindowTitle(window, std::string("FPS: "+std::to_string(FPS)+" ("+std::to_string(avgFrameTime)+" ms)").c_str());
+            accumulatedFrameTime = 0;
+            numFrames = 0;
         }
 
         t_start = t_now;
@@ -236,7 +263,8 @@ int main(int argc, char* argv[]){
         glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
 
 
-        glDrawElements(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0);
+        //glDrawElements(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0);
+        glDrawElementsInstanced(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0, 9);
 
         // Swap buffers
         SDL_GL_SwapWindow(window);

@@ -13,24 +13,28 @@ class Ship{
 public:
     Ship(float s, float pX, float pY);
     ~Ship();
-    void show();
-    void hide();
-    bool isVisible();
     void changeOrientation(float delta); // consider setOrientation
     float getOrientation();
     glm::mat4 getTransMatrix(unsigned int frameTime);
     void updateNextPos();
-    void turnLeft(bool);
-    void turnRight(bool);
-    void thrustForward(bool);
+    void turnLeft(bool turn);
+    void turnRight(bool turn);
+    void thrustForward(bool thrust);
+    void setVisibility(bool visibility);
 private:
-    static float vertices[];
+    float const vertices[8] = { // update!!
+        1.0f, 0.5f,  // Front of ship
+        0.0f, 1.0f, // Rear right
+        0.25f, 0.5f, // Rear centre
+        0.0f, 0.0f // Rear left
+    };
     float scale, posX, posY, velocityX, velocityY, orientation, nextOrientation;
     float nextPosX, nextPosY, nextVelocityX, nextVelocityY;
     //glm::mat4 transformation;
-    bool visible, isThrusting, isTurningLeft, isTurningRight;
+    bool isVisible, isThrusting, isTurningLeft, isTurningRight;
     unsigned int timeSinceLastUpdate;
-
+    float const drag = 5.0f/10000000.0f;
+    float const thrust = 2.4f/10000000000.0f;
 };
 
 #endif

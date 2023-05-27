@@ -132,9 +132,9 @@ glm::mat4 Ship::getTransMatrix(unsigned int frameTime){
 
     glm::mat4 trans = glm::mat4(1.0f);
     trans = glm::translate(trans, shipPos);
-    trans = glm::translate(trans, glm::vec3(0.5*scale, 0.5*scale, 0.0));
+    //trans = glm::translate(trans, glm::vec3(0.5*scale, 0.5*scale, 0.0));
     trans = glm::rotate(trans, orient, glm::vec3(0.0f, 0.0f, 1.0f));
-    trans = glm::translate(trans, glm::vec3(-0.5*scale, -0.5*scale, 0.0));
+    //trans = glm::translate(trans, glm::vec3(-0.5*scale, -0.5*scale, 0.0));
     trans = glm::scale(trans, glm::vec3(scale, scale, scale));
 
     return trans;
