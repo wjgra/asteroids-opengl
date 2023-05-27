@@ -2,19 +2,11 @@
 
 static const float piValue = 3.1415926535897932385;
 
-float Ship::vertices[]{
-        1.0f, 0.5f,  // Front of ship
-        0.0f, 1.0f, // Rear right
-        0.25f, 0.5f, // Rear centre
-        0.0f, 0.0f // Rear left
-};
-
 Ship::Ship(float s, float pX, float pY):scale(s), posX(pX), posY(pY){
-    // random initial velocity
-    velocityX = 0.0f;//150.0f/(1000000.0f);//0.0f;
+    velocityX = 0.0f;//150.0f/(1000000.0f);//0.0f;// random initial velocity
     velocityY = 0.0f;//-100.0f/(1000000.0f);//0.0f;
     orientation = 0.0f;//2.0f;//0.0f
-    visible = false;
+    isVisible = false;
     isThrusting = false;
     timeSinceLastUpdate = 0;
     isTurningLeft = false;
@@ -22,18 +14,6 @@ Ship::Ship(float s, float pX, float pY):scale(s), posX(pX), posY(pY){
 }
 
 Ship::~Ship(){
-}
-
-void Ship::show(){
-    visible = true;
-}
-
-void Ship::hide(){
-    visible = false;
-}
-
-bool Ship::isVisible(){
-    return visible;
 }
 
 void Ship::changeOrientation(float delta){
@@ -54,29 +34,29 @@ float Ship::getOrientation(){
 void Ship::updateNextPos(){
     //use vectors
     float timeStep = 15000; //timestep in microseconds
-    float alpha = 1.0f/1000000.0f;
+    
 
     // reuse quantities
-    float expMinusAlphaT = exp(-alpha*timeStep);
-    //std::cout << "ealphat: " << expMinusAlphaT <<"\n";
-    nextPosX = posX + velocityX*(1-expMinusAlphaT)/alpha;
-    nextPosY = posY + velocityY*(1-expMinusAlphaT)/alpha;
-    nextVelocityX = velocityX * expMinusAlphaT;
-    nextVelocityY = velocityY * expMinusAlphaT;
+    float expMinusDragT = exp(-drag*timeStep);
+    //std::cout << "expMinusDragt: " << expMinusDragT <<"\n";
+    nextPosX = posX + velocityX*(1-expMinusDragT)/drag;
+    nextPosY = posY + velocityY*(1-expMinusDragT)/drag;
+    nextVelocityX = velocityX * expMinusDragT;
+    nextVelocityY = velocityY * expMinusDragT;
 
-    float T = alpha*480.0f/(2000000.0f);
-    float Tx = T*cos(orientation);
-    float Ty = T*sin(orientation);
+    //float T = drag*480.0f/(2000000.0f);
+    float Tx = thrust*cos(orientation);
+    float Ty = thrust*sin(orientation);
 
-    float temp = (alpha*timeStep+expMinusAlphaT-1)/(alpha*alpha);
+    float temp = (drag*timeStep+expMinusDragT-1)/(drag*drag);
     if (isThrusting){ //correction term if thrusting (assume thrust in direction at beginning of interval)
         
         
         nextPosX += Tx*temp;
         nextPosY += Ty*temp;
 
-        nextVelocityX += (1-expMinusAlphaT)*Tx/alpha;
-        nextVelocityY += (1-expMinusAlphaT)*Ty/alpha;
+        nextVelocityX += (1-expMinusDragT)*Tx/drag;
+        nextVelocityY += (1-expMinusDragT)*Ty/drag;
     }
 
     //std::cout << "old: "<< posX << ", " <<posY <<"\nnew: "<<nextPosX<<", "<<nextPosY<<"\n";
@@ -102,7 +82,7 @@ void Ship::updateNextPos(){
 glm::mat4 Ship::getTransMatrix(unsigned int frameTime){
     // Init with zero call first
     float timeStep = 15000; //timestep in microseconds
-    float alpha = 1.0f/1000000.0f;
+    //float drag = 1.0f/1000000.0f;
     // non thrusting case
     
     timeSinceLastUpdate += frameTime;   
@@ -170,4 +150,8 @@ void Ship::turnRight(bool turn){
 
 void Ship::thrustForward(bool thrust){
     isThrusting = thrust;
+}
+
+void Ship::setVisibility(bool visibility){
+    isVisible = visibility;
 }
