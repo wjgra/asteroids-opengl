@@ -1,5 +1,6 @@
 #include "../include/shader_program.hpp"
 
+// Constructs a ShaderProgram object
 // To do: move file reading out of the constructor
 ShaderProgram::ShaderProgram(const std::string vertexPath, const std::string fragmentPath){
     std::string vertexSource, fragmentSource;
@@ -50,6 +51,7 @@ ShaderProgram::ShaderProgram(const std::string vertexPath, const std::string fra
     glDeleteShader(fragmentShaderID);
 }
 
+// Compiles an individual shader of the given type (e.g. GL_VERTEX_SHADER)
 GLuint ShaderProgram::compileShader(const char *source, GLenum shaderType){
     // Compile shader from source
     unsigned int shaderID;
@@ -72,14 +74,17 @@ GLuint ShaderProgram::compileShader(const char *source, GLenum shaderType){
 ShaderProgram::~ShaderProgram(){
 }
 
+// Gets the ID of shader program
 GLuint ShaderProgram::getID() const{
     return programID;
 }
 
+// Activates the shader program for use
 void ShaderProgram::useProgram(){
     glUseProgram(programID);
 }
 
+// Retrieves the location of the named uniform variable
 GLint ShaderProgram::getUniformLocation(const std::string &name) const{
     return glGetUniformLocation(programID, name.c_str());
 }
