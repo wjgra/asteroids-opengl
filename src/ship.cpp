@@ -11,6 +11,12 @@ Ship::Ship(float s, float pX, float pY):scale(s), posX(pX), posY(pY){
     timeSinceLastUpdate = 0;
     isTurningLeft = false;
     isTurningRight = false;
+    // below true for initial velocity of zero and no thrusting
+    //nextPosX = posX;
+    //nextPosY = posY;
+    //nextVelocityX = velocityX;
+    //nextVelocityY = velocityY;
+    updateNextPos();
 }
 
 Ship::~Ship(){
@@ -39,6 +45,8 @@ void Ship::updateNextPos(){
     // reuse quantities
     float expMinusDragT = exp(-drag*timeStep);
     //std::cout << "expMinusDragt: " << expMinusDragT <<"\n";
+
+    // check for zero drag
     nextPosX = posX + velocityX*(1-expMinusDragT)/drag;
     nextPosY = posY + velocityY*(1-expMinusDragT)/drag;
     nextVelocityX = velocityX * expMinusDragT;

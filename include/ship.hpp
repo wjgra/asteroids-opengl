@@ -21,20 +21,22 @@ public:
     void turnRight(bool turn);
     void thrustForward(bool thrust);
     void setVisibility(bool visibility);
-private:
-    float const vertices[8] = { // update!!
-        1.0f, 0.5f,  // Front of ship
-        0.0f, 1.0f, // Rear right
-        0.25f, 0.5f, // Rear centre
-        0.0f, 0.0f // Rear left
+public:
+    float const vertices[8] = {
+        0.5f, 0.0f,  // Front of ship
+        -0.5f, 0.5f, // Rear right
+        -0.25f, 0.0f, // Rear centre
+        -0.5f, -0.5f // Rear left
     };
+    GLuint const elements[5] = {0,1,2,3,0};
+    float const drag = 5.0f/10000000.0f;
+    float const thrust = 2.4f/10000000000.0f;
+private:
     float scale, posX, posY, velocityX, velocityY, orientation, nextOrientation;
     float nextPosX, nextPosY, nextVelocityX, nextVelocityY;
     //glm::mat4 transformation;
     bool isVisible, isThrusting, isTurningLeft, isTurningRight;
-    unsigned int timeSinceLastUpdate;
-    float const drag = 5.0f/10000000.0f;
-    float const thrust = 2.4f/10000000000.0f;
+    unsigned int timeSinceLastUpdate;  
 };
 
 #endif
