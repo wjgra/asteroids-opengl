@@ -157,7 +157,7 @@ int main(int argc, char* argv[]){
         // prevent simulation and display getting too out of sync
         if (frameTime > 250000){
             frameTime = 250000;
-            std::cout << "Frame hit maximum duration!\n";
+            // std::cout << "Frame hit maximum duration!\n";
         }
 
         // Calculate average frame length and FPS for display in title bar
@@ -174,7 +174,7 @@ int main(int argc, char* argv[]){
         t_start = t_now;
 
         // Clear buffer
-        glClearColor(0.f, 0.f, 0.f, 1.f);
+        glClearColor(0.03f, 0.03f, 0.03f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Prepare to render
@@ -212,6 +212,9 @@ static void handleEvents(SDL_Event event, GameState& gState){
             //break;
         case SDL_KEYDOWN:
             switch(event.key.keysym.scancode){
+                case SDL_SCANCODE_ESCAPE:
+                    gState.quit = true;
+                    break;
                 case SDL_SCANCODE_F11:
                     gState.fullScreen = !gState.fullScreen;
                     if (gState.fullScreen){
