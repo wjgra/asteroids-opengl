@@ -15,6 +15,10 @@ public:
     Drawable();
     ~Drawable();
     void setUpBuffers();
+    void setVertices(std::vector<float> verts);
+    float const *getVertices() const;
+    void setElements(std::vector<GLuint> elts);
+    GLuint const *getElements() const;
 private:
     std::vector<float> vertices;
     std::vector<GLuint> elements;

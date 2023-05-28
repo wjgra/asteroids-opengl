@@ -8,7 +8,10 @@ Drawable::Drawable(){
 }
 
 Drawable::~Drawable(){
-
+    // Delete buffers
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 }
 
 void Drawable::setUpBuffers(){
@@ -24,4 +27,20 @@ void Drawable::setUpBuffers(){
     // Bind EBO and copy element data into EBO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements.data()), elements.data(), GL_STATIC_DRAW);
+}
+
+void Drawable::setVertices(std::vector<float> verts){
+    vertices = verts;
+}
+
+float const *Drawable::getVertices() const{
+    return vertices.data();
+}
+
+void Drawable::setElements(std::vector<GLuint> elts){
+    elements = elts;
+}
+
+GLuint const *Drawable::getElements() const{
+    return elements.data();
 }
