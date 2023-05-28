@@ -61,8 +61,8 @@ int main(int argc, char* argv[]){
     }
 
     // Create OpenGL context
-    SDL_GLContext context = SDL_GL_CreateContext(gameState.window);
-    if (!context){
+    gameState.context = SDL_GL_CreateContext(gameState.window);
+    if (!gameState.context){
         std::cout << "Failed to create OpenGL context\n";
         return EXIT_FAILURE;
     }
@@ -174,7 +174,7 @@ int main(int argc, char* argv[]){
         t_start = t_now;
 
         // Clear buffer
-        glClearColor(0.03f, 0.03f, 0.03f, 1.f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Prepare to render
@@ -192,7 +192,12 @@ int main(int argc, char* argv[]){
         SDL_GL_SwapWindow(gameState.window);
     }
 
-    // To do: do we need to explicitly release VAO etc?
+    // Cleanup
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    
+    SDL_GL_DeleteContext(gameState.context);
     SDL_DestroyWindow(gameState.window);
     SDL_Quit();
 
@@ -204,11 +209,7 @@ static void handleEvents(SDL_Event event, GameState& gState){
         case SDL_QUIT:
             gState.quit = true;
             break;
-        //case SDL_WINDOWEVENT: // To do: handle resize events
-            /*if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                std::cout << "Resizing window\n";
-                //SDL_SetWindowSize(window, event.window.data1, event.window.data2);
-            }*/
+        //case SDL_WINDOWEVENT: // To do: handle window resize events
             //break;
         case SDL_KEYDOWN:
             switch(event.key.keysym.scancode){

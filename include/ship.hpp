@@ -16,6 +16,7 @@ public:
     ~Ship();
     // Simulation functions
     void updateNextPos();
+    // -- Called every frame
     glm::mat4 getTransMatrix(unsigned int frameTime);
     // -- Called on user input
     void turnLeft(bool turn);

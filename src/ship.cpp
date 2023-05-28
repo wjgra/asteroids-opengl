@@ -1,6 +1,6 @@
 #include "../include/ship.hpp"
 
-static const float piValue = 3.1415926535897932385;
+static float const piValue = 3.1415926535897932385;
 
 Ship::Ship(float s, float pX, float pY): scale(s), posX(pX), posY(pY){
     // To do: use delegated constructor from 'drawable' class to set vertices
@@ -23,11 +23,11 @@ Ship::~Ship(){
 // Simulation is modelled as:
 //      d^2x/dt^2 = thrust - drag * unit_vector(x), 
 // where x and thrust are in R^2; drag > 0.
-// It is assumed that thrust is of constant magnitude in the direction of the 
+// It is assumed that the thrust force is of constant magnitude in the direction of the 
 // ship's orientation at t = 0.
 // When integrating over [0, t], this admits exact solution:
-//      x = x_0 + (1/d)*(1-exp(-d*t))*v_0 + (1/d^2)*(d*t+exp(-d*t)-1)*T
-//      where T = thrust, d = drag.
+//      x = x_0 + (1/d)*(1-exp(-d*t))*v_0 + (1/d^2)*(d*t+exp(-d*t)-1)*T,
+// where T = thrust, d = drag.
 void Ship::updateNextPos(){
     float expMinusDragT = exp(-drag * timeStep);
 

@@ -1,5 +1,5 @@
-#ifndef _GAME_STATE_H_
-#define _GAME_STATE_H_
+#ifndef _GAME_STATE_HPP_
+#define _GAME_STATE_HPP_
 
 #include "../include/glad/glad.h"
 #include "../include/ship.hpp"
