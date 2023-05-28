@@ -2,97 +2,72 @@
 
 static const float piValue = 3.1415926535897932385;
 
-Ship::Ship(float s, float pX, float pY):scale(s), posX(pX), posY(pY){
-    velocityX = 0.0f;//150.0f/(1000000.0f);//0.0f;// random initial velocity
-    velocityY = 0.0f;//-100.0f/(1000000.0f);//0.0f;
-    orientation = 0.0f;//2.0f;//0.0f
+Ship::Ship(float s, float pX, float pY): scale(s), posX(pX), posY(pY){
+    // To do: use delegated constructor from 'drawable' class to set vertices
+    // Also consider using vector for vertices?
+    velocityX = 0.0f;
+    velocityY = 0.0f;
+    orientation = 0.0f;
     isVisible = false;
     isThrusting = false;
     timeSinceLastUpdate = 0;
     isTurningLeft = false;
     isTurningRight = false;
-    // below true for initial velocity of zero and no thrusting
-    //nextPosX = posX;
-    //nextPosY = posY;
-    //nextVelocityX = velocityX;
-    //nextVelocityY = velocityY;
     updateNextPos();
 }
 
 Ship::~Ship(){
 }
 
-void Ship::changeOrientation(float delta){
-    orientation += delta;
-    // Keep in range [0, 2pi)
-    while ( orientation >= 2 * piValue){
-        orientation -= 2 *piValue;
-    }
-    while (orientation < 0){
-        orientation += 2 * piValue;
-    }
-}
-
-float Ship::getOrientation(){
-    return orientation;
-}
-
+// Updates the orientation and nextPos/nextVelocity variables by stepping forwards one timeStep.
+// Simulation is modelled as:
+//      d^2x/dt^2 = thrust - drag * unit_vector(x), 
+// where x and thrust are in R^2; drag > 0.
+// It is assumed that thrust is of constant magnitude in the direction of the 
+// ship's orientation at t = 0.
+// When integrating over [0, t], this admits exact solution:
+//      x = x_0 + (1/d)*(1-exp(-d*t))*v_0 + (1/d^2)*(d*t+exp(-d*t)-1)*T
+//      where T = thrust, d = drag.
 void Ship::updateNextPos(){
-    //use vectors
-    float timeStep = 15000; //timestep in microseconds
-    
+    float expMinusDragT = exp(-drag * timeStep);
 
-    // reuse quantities
-    float expMinusDragT = exp(-drag*timeStep);
-    //std::cout << "expMinusDragt: " << expMinusDragT <<"\n";
+    // Calculate pos/vel in absence of thrust
+    nextPosX = posX + velocityX * (1 - expMinusDragT) / drag;
+    nextPosY = posY + velocityY * (1 - expMinusDragT) / drag;
 
-    // check for zero drag
-    nextPosX = posX + velocityX*(1-expMinusDragT)/drag;
-    nextPosY = posY + velocityY*(1-expMinusDragT)/drag;
     nextVelocityX = velocityX * expMinusDragT;
     nextVelocityY = velocityY * expMinusDragT;
 
-    //float T = drag*480.0f/(2000000.0f);
-    float Tx = thrust*cos(orientation);
-    float Ty = thrust*sin(orientation);
-
-    float temp = (drag*timeStep+expMinusDragT-1)/(drag*drag);
-    if (isThrusting){ //correction term if thrusting (assume thrust in direction at beginning of interval)
+    // Correction term if thrusting 
+    if (isThrusting){ 
+        float Tx = thrust * cos(orientation);
+        float Ty = thrust * sin(orientation);
+        float temp = (drag * timeStep + expMinusDragT - 1) / (drag * drag);
         
-        
-        nextPosX += Tx*temp;
-        nextPosY += Ty*temp;
+        nextPosX += Tx * temp;
+        nextPosY += Ty * temp;
 
-        nextVelocityX += (1-expMinusDragT)*Tx/drag;
-        nextVelocityY += (1-expMinusDragT)*Ty/drag;
+        nextVelocityX += (1 - expMinusDragT) * Tx / drag;
+        nextVelocityY += (1 - expMinusDragT) * Ty / drag;
     }
 
-    //std::cout << "old: "<< posX << ", " <<posY <<"\nnew: "<<nextPosX<<", "<<nextPosY<<"\n";
-    float factor = 2.0f/100.0f;
-    //std::cout << 2.0f*piValue*factor <<"\n";
-    if (isTurningLeft && isTurningRight){ // use xor
+    // Update orientation based on inputs
+    float rotationPerTimeStep = 2.0f / 100.0f;
+    if (isTurningLeft == isTurningRight){
         nextOrientation = orientation;
     }
     else if (isTurningLeft){
-        nextOrientation = orientation-2.0f*piValue*factor;
+        nextOrientation = orientation - 2.0f * piValue * rotationPerTimeStep;
     }
     else if (isTurningRight){
-        nextOrientation = orientation+2.0f*piValue*factor;
+        nextOrientation = orientation + 2.0f * piValue * rotationPerTimeStep;
     }
-    else{
-        nextOrientation = orientation;
-    }
-    //isTurningLeft = false;
-    //isTurningRight = false;//temp removal
-    
 }
 
+// Returns a transformation matrix by interpolating between the current 
+// and next position using the frame length.
 glm::mat4 Ship::getTransMatrix(unsigned int frameTime){
-    // Init with zero call first
-    float timeStep = 15000; //timestep in microseconds
-    //float drag = 1.0f/1000000.0f;
-    // non thrusting case
-    
+    // Update positions/velocities if timeStep passed since last update
     timeSinceLastUpdate += frameTime;   
     int count = 0;
     while (timeSinceLastUpdate >= timeStep){
@@ -101,48 +76,47 @@ glm::mat4 Ship::getTransMatrix(unsigned int frameTime){
         velocityX = nextVelocityX;
         velocityY = nextVelocityY;
         orientation = nextOrientation;
-
         updateNextPos();
         timeSinceLastUpdate -= timeStep;
         count++;
     }
     
-    // temporary wrapping - need to create second instance to ensure smooth transition
+    /*// Alert if more than two updates performed per frame    
+    if (count>2)
+        std::cout << "New matrix ("<<count<<")\n";*/
+
+    // Wrap position when crossing edges of the screen
     if (posX > 640 && nextPosX > 640){
-        posX-=640;
-        nextPosX-=640;
+        posX -= 640;
+        nextPosX -= 640;
     }
-    else if (posX <0 && nextPosX <0){
-        posX+=640;
-        nextPosX+=640;
+    else if (posX < 0 && nextPosX < 0){
+        posX += 640;
+        nextPosX += 640;
     }
 
     if (posY > 480 && nextPosY > 480){
-        posY-=480;
-        nextPosY-=480;
+        posY -= 480;
+        nextPosY -= 480;
     }
-    else if (posY <0 && nextPosY <0){
-        posY+=480;
-        nextPosY+=480;
+    else if (posY < 0 && nextPosY < 0){
+        posY += 480;
+        nextPosY += 480;
     }
 
+    // Linearly interpolate position and orientation
+    float tInterp = float(timeSinceLastUpdate)/float(timeStep);
 
-    float tInterp = float(timeSinceLastUpdate)/float(timeStep);    
-    if (count>2)
-        std::cout << "New matrix ("<<count<<")\n";
-    
-    //std::cout << "Interp: "<< tInterp <<"\n";
     glm::vec3 shipPos = glm::vec3(posX*(1-tInterp)+nextPosX*tInterp,
         posY*(1-tInterp)+nextPosY*tInterp,
         0.0f);
 
     float orient = (1-tInterp)*orientation+tInterp*nextOrientation;
 
+    // Create transformation matrix
     glm::mat4 trans = glm::mat4(1.0f);
     trans = glm::translate(trans, shipPos);
-    //trans = glm::translate(trans, glm::vec3(0.5*scale, 0.5*scale, 0.0));
     trans = glm::rotate(trans, orient, glm::vec3(0.0f, 0.0f, 1.0f));
-    //trans = glm::translate(trans, glm::vec3(-0.5*scale, -0.5*scale, 0.0));
     trans = glm::scale(trans, glm::vec3(scale, scale, scale));
 
     return trans;
@@ -160,6 +134,22 @@ void Ship::thrustForward(bool thrust){
     isThrusting = thrust;
 }
 
+// Sets the orientation of the ship manually.
+void Ship::setOrientation(float orient){
+    orientation = orient;
+}
+
+// Returns the current orientation of the ship.
+float Ship::getOrientation() const{
+    return orientation;
+}
+
+// Sets the visibility of the ship (currently unused).
 void Ship::setVisibility(bool visibility){
     isVisible = visibility;
+}
+
+// Returns the current visibility of the ship (currently unused).
+bool Ship::getVisibility() const{
+    return isVisible;
 }

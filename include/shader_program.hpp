@@ -7,9 +7,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <vector>
-//#include <algorithm>
-  
+#include <vector> 
 
 class ShaderProgram
 {
