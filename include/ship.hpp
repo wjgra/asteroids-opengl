@@ -2,6 +2,7 @@
 #define _SHIP_HPP_
 
 #include "../include/glad/glad.h"
+#include "../include/drawable.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -10,7 +11,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-class Ship{
+class Ship : public Drawable {
 public:
     Ship(float s, float pX, float pY);
     ~Ship();
@@ -28,13 +29,6 @@ public:
     void setVisibility(bool visibility);
     bool getVisibility() const;
 public:
-    float const vertices[8] = {
-        0.5f, 0.0f,  // front of ship
-        -0.5f, 0.5f, // rear right
-        -0.25f, 0.0f, // rear centre
-        -0.5f, -0.5f // rear left
-    };
-    GLuint const elements[5] = {0,1,2,3,0};
     // Simulation parameters
     float const drag = 5.0f / 10000000.0f;
     float const thrust = 2.4f / 10000000000.0f; // old value: drag*480.0f/(2000000.0f)

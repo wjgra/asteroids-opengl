@@ -8,19 +8,19 @@
 
 struct GameState{
     // Window state variables
-    SDL_Window* window;
-    bool fullScreen;
-    SDL_GLContext context;
-    Uint32 winFlags = SDL_WINDOW_OPENGL;// | SDL_WINDOW_RESIZABLE;
-    bool useVsync = true;
+    SDL_Window* window {nullptr};
+    bool fullScreen {false};
+    SDL_GLContext context {nullptr};
+    Uint32 winFlags {SDL_WINDOW_OPENGL};// | SDL_WINDOW_RESIZABLE;
+    bool useVsync {true};
     // -- Dimensions of notional window
-    int const winWidth = 640;
-    int const winHeight = 480;
+    int const winWidth {640};
+    int const winHeight {480};
     // -- Resolution is winScale * notional dimension
-    unsigned int winScale;
+    unsigned int winScale {1};
     // Game state variables
-    Ship* ship;
-    bool quit = false;
+    Ship* ship {nullptr};
+    bool quit {false};
 };
 
 #endif

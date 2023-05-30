@@ -3,9 +3,6 @@
 static float const piValue = 3.1415926535897932385;
 
 Ship::Ship(float s, float pX, float pY): scale(s), posX(pX), posY(pY){
-    // To do: use delegated constructor from 'drawable' class to set vertices
-    // Also consider using vector for vertices?
-    velocityX = 0.0f;
     velocityY = 0.0f;
     orientation = 0.0f;
     isVisible = false;
@@ -14,6 +11,15 @@ Ship::Ship(float s, float pX, float pY): scale(s), posX(pX), posY(pY){
     isTurningLeft = false;
     isTurningRight = false;
     updateNextPos();
+
+    // Set up mesh data
+    setVertices(std::vector<float>({
+        0.5f, 0.0f,  // front of ship
+        -0.5f, 0.5f, // rear right
+        -0.25f, 0.0f, // rear centre
+        -0.5f, -0.5f // rear left
+    }));
+    setElements(std::vector<GLuint>({0,1,2,3,0}));
 }
 
 Ship::~Ship(){

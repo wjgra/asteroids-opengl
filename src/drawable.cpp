@@ -8,10 +8,6 @@ Drawable::Drawable(){
 }
 
 Drawable::~Drawable(){
-    // Delete buffers
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
 }
 
 void Drawable::setUpBuffers(){
@@ -29,6 +25,17 @@ void Drawable::setUpBuffers(){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements.data()), elements.data(), GL_STATIC_DRAW);
 }
 
+void Drawable::releaseBuffers(){
+    // Delete buffers
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    // N.B. Whilst this would be ideally be in the destructor, we need to ensure that the buffers
+    // are deleted when the OpenGL context is still current. The ideal solution would be to keep
+    // track of the context in this class, but it seems over the top for this small project.
+    // Something to try another time!
+}
+
 void Drawable::setVertices(std::vector<float> verts){
     vertices = verts;
 }
@@ -43,4 +50,8 @@ void Drawable::setElements(std::vector<GLuint> elts){
 
 GLuint const *Drawable::getElements() const{
     return elements.data();
+}
+
+void Drawable::bindArray(){
+    glBindVertexArray(VAO);
 }

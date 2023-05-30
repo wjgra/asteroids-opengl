@@ -25,23 +25,22 @@ static void handleEvents(SDL_Event event, GameState& gState);
 int main(int argc, char* argv[]){
     // Initialise gamestate struct
     GameState gameState = {};
-    gameState.window = nullptr;
-    gameState.fullScreen = false;
     gameState.winScale = 2;
-    gameState.ship = nullptr;
-    gameState.context = nullptr;
 
     // Initialise SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0){
         std::cout << "Failed to initialise SDL\n";
         return EXIT_FAILURE;
     }
+
+    // Load SDL OpenGL library
     SDL_GL_LoadLibrary(nullptr);
 
     // Request an OpenGL 3.3 context
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    
     // Request a depth buffer
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
@@ -87,32 +86,16 @@ int main(int argc, char* argv[]){
     Ship ship(shipScale, gameState.winWidth/2.0f, gameState.winHeight/2.0f);
     gameState.ship = &ship; // Set pointer to ship object in gamestate
 
-    // Compile shaders for ship
-    ShaderProgram shipShader(".//shaders//vertex.vert", ".//shaders//fragment.frag");
-    shipShader.useProgram();
-
     // Set up buffer objects for ship
-    GLuint VBO, EBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    ship.setUpBuffers();
 
-    // Bind VAO
-    glBindVertexArray(VAO); 
-
-    // Bind VBO and copy vertex data into VBO
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(ship.vertices), ship.vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // Bind EBO and copy element data into EBO
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ship.elements), ship.elements, GL_STATIC_DRAW);
+    // Compile shader for rendering ship/asteroids
+    ShaderProgram wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag");
+    wrapShader.useProgram();
 
     // Get locations of model/projection matrices
-    GLint uniformModelTrans = shipShader.getUniformLocation("model");
-    GLint uniformProjTrans = shipShader.getUniformLocation("projection");
+    GLint uniformModelTrans = wrapShader.getUniformLocation("model");
+    GLint uniformProjTrans = wrapShader.getUniformLocation("projection");
 
     // Set orthogonal projection matrix
     glm::mat4 projection = glm::ortho(0.0f, (float)gameState.winWidth, (float)gameState.winHeight, 0.0f, -1.0f, 1.0f); 
@@ -133,7 +116,7 @@ int main(int argc, char* argv[]){
 
     // Copy offsets to uniform variables
     for (int i = 0; i < 9; ++i){
-        GLint offsetLocation = shipShader.getUniformLocation("offsets["+std::to_string(i)+"]");
+        GLint offsetLocation = wrapShader.getUniformLocation("offsets["+std::to_string(i)+"]");
         glUniform2fv(offsetLocation,1,glm::value_ptr(instanceOffsets[i]));
     }    
 
@@ -178,8 +161,8 @@ int main(int argc, char* argv[]){
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Prepare to render
-        shipShader.useProgram();
-        glBindVertexArray(VAO);
+        wrapShader.useProgram();
+        ship.bindArray();
 
         // Update ship transformation matrix
         glm::mat4 trans = ship.getTransMatrix(frameTime);
@@ -191,12 +174,9 @@ int main(int argc, char* argv[]){
         // Swap buffers
         SDL_GL_SwapWindow(gameState.window);
     }
-
-    // Cleanup
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
     
+    // Cleanup
+    ship.releaseBuffers(); // To do: have a release method in GameState class
     SDL_GL_DeleteContext(gameState.context);
     SDL_DestroyWindow(gameState.window);
     SDL_Quit();
