@@ -102,8 +102,11 @@ std::vector<float> const Asteroid::genVerts(unsigned int segments){
         temp[2*i] = tempX;
         temp[2*i+1] = tempY;
         float tempVal = tempX*cos(unitAngle)-tempY*sin(unitAngle);
-        tempY = tempX*sin(unitAngle)+tempY*cos(unitAngle);
-        tempX = tempVal;
+
+        float radiusScale = 0.7f + 0.6f*(rand()%11)/10.0f;
+
+        tempY = radiusScale*tempX*sin(unitAngle)+tempY*cos(unitAngle);
+        tempX = radiusScale*tempVal;
     }
     return temp;
 }
