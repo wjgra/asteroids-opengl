@@ -12,16 +12,16 @@
 
 class Drawable{
 public:
-    Drawable();
+    Drawable(const std::vector<float>& verts, const std::vector<GLuint>& elts);
     ~Drawable();
     void setUpBuffers();
-    void setVertices(std::vector<float> verts);
+    void releaseBuffers();
     float const *getVertices() const;
-    void setElements(std::vector<GLuint> elts);
     GLuint const *getElements() const;
-private:
-    std::vector<float> vertices;
-    std::vector<GLuint> elements;
+    void draw();
+//private:
+    std::vector<float> const vertices;
+    std::vector<GLuint> const elements;
     GLuint VBO, EBO, VAO;
 };
 

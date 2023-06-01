@@ -25,11 +25,7 @@ static void handleEvents(SDL_Event event, GameState& gState);
 int main(int argc, char* argv[]){
     // Initialise gamestate struct
     GameState gameState = {};
-    gameState.window = nullptr;
-    gameState.fullScreen = false;
     gameState.winScale = 2;
-    gameState.ship = nullptr;
-    gameState.context = nullptr;
 
     // Initialise SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0){
@@ -84,6 +80,7 @@ int main(int argc, char* argv[]){
     
     // Create ship object at centre of screen, length 1/40th of screenwidth
     float shipScale = float(gameState.winWidth)/40;
+
     Ship ship(shipScale, gameState.winWidth/2.0f, gameState.winHeight/2.0f);
     gameState.ship = &ship; // Set pointer to ship object in gamestate
 
@@ -91,6 +88,8 @@ int main(int argc, char* argv[]){
     ShaderProgram shipShader(".//shaders//vertex.vert", ".//shaders//fragment.frag");
     shipShader.useProgram();
 
+    ship.setUpBuffers();
+    /*
     // Set up buffer objects for ship
     GLuint VBO, EBO, VAO;
     glGenVertexArrays(1, &VAO);
@@ -102,14 +101,17 @@ int main(int argc, char* argv[]){
 
     // Bind VBO and copy vertex data into VBO
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(ship.vertices), ship.vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, ship.vertices.size()*sizeof(float), ship.vertices.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Bind EBO and copy element data into EBO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(ship.elements), ship.elements, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, ship.elements.size()*sizeof(GLuint), ship.elements.data(), GL_STATIC_DRAW);
 
+    // Unbind VAO
+    glBindVertexArray(0);
+    */
     // Get locations of model/projection matrices
     GLint uniformModelTrans = shipShader.getUniformLocation("model");
     GLint uniformProjTrans = shipShader.getUniformLocation("projection");
@@ -179,24 +181,25 @@ int main(int argc, char* argv[]){
 
         // Prepare to render
         shipShader.useProgram();
-        glBindVertexArray(VAO);
 
         // Update ship transformation matrix
         glm::mat4 trans = ship.getTransMatrix(frameTime);
         glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
 
         // Draw ship
-        glDrawElementsInstanced(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0, 9);
-
+        ship.draw();
+        //glDrawElementsInstanced(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0, 9);
         // Swap buffers
         SDL_GL_SwapWindow(gameState.window);
     }
 
+    /*
     // Cleanup
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-    
+    */
+    ship.releaseBuffers();
     SDL_GL_DeleteContext(gameState.context);
     SDL_DestroyWindow(gameState.window);
     SDL_Quit();
