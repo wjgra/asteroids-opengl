@@ -2,12 +2,11 @@
 
 static float const piValue = 3.1415926535897932385;
 
-Asteroid::Asteroid(float s, float pX, float pY): 
-    Drawable(genVerts(), genElts()),
-    scale(s), posX(pX), posY(pY){ 
-    velocityX = speed*cos(piValue/4);
-    velocityY = speed*sin(piValue/4);
-    orientation = 0.0f;
+Asteroid::Asteroid(float s, float pX, float pY, float dir, unsigned int segs): 
+    Drawable(genVerts(segs), genElts(segs)),
+    scale{s}, posX{pX}, posY{pY}, orientation{dir}{
+    velocityX = speed*cos(dir);
+    velocityY = speed*sin(dir);
     isVisible = false;
     timeSinceLastUpdate = 0;
     updateNextPos();
@@ -94,28 +93,26 @@ bool Asteroid::getVisibility() const{
     return isVisible;
 }
 
-std::vector<float> const Asteroid::genVerts(){
+std::vector<float> const Asteroid::genVerts(unsigned int segments){
     // Set up mesh data
-    unsigned int n = 11;
-    std::vector<float> temp(2*n);
-    
+    std::vector<float> temp(2*segments);
+    float const unitAngle = 2*piValue/segments;
     float tempX = 1.0f, tempY = 0.0f;
-    for (unsigned int i = 0; i<n; ++i){
+    for (unsigned int i = 0; i<segments; ++i){
         temp[2*i] = tempX;
         temp[2*i+1] = tempY;
-        float tempVal = tempX*cos(2*piValue/n)-tempY*sin(2*piValue/n);
-        tempY = tempX*sin(2*piValue/n)+tempY*cos(2*piValue/n);
+        float tempVal = tempX*cos(unitAngle)-tempY*sin(unitAngle);
+        tempY = tempX*sin(unitAngle)+tempY*cos(unitAngle);
         tempX = tempVal;
     }
     return temp;
 }
 
-std::vector<GLuint> const Asteroid::genElts(){
-    unsigned int n = 11;
-    std::vector<GLuint> temp2(n+1);
-    for (unsigned int i = 0; i<n; ++i){
+std::vector<GLuint> const Asteroid::genElts(unsigned int segments){
+    std::vector<GLuint> temp2(segments+1);
+    for (unsigned int i = 0; i<segments; ++i){
         temp2[i] = i;
     }
-    temp2[n+1] = 0;
+    temp2[segments] = 0;
     return temp2;
 }

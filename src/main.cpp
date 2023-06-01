@@ -21,6 +21,8 @@
 #include "../include/asteroid.hpp"
 #include "../include/game_state.hpp"
 
+static float const piValue = 3.1415926535897932385;
+
 static void handleEvents(SDL_Event event, GameState& gState);
 
 int main(int argc, char* argv[]){
@@ -85,7 +87,7 @@ int main(int argc, char* argv[]){
     Ship ship(shipScale, gameState.winWidth/2.0f, gameState.winHeight/2.0f);
     gameState.ship = &ship; // Set pointer to ship object in gamestate
 
-    Asteroid asteroid(shipScale*2.0f, gameState.winWidth/4.0f, gameState.winHeight/2.0f);
+    Asteroid asteroid(shipScale*2.0f, gameState.winWidth/4.0f, gameState.winHeight/2.0f, -piValue/4.0f, 11);
 
     // Compile shaders for ship
     ShaderProgram wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag");

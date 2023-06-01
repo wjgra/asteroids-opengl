@@ -13,7 +13,7 @@
 
 class Asteroid : public Drawable {
 public:
-    Asteroid(float s, float pX, float pY);
+    Asteroid(float s, float pX, float pY, float dir, unsigned int segs);
     ~Asteroid();
     // Simulation functions
     void updateNextPos();
@@ -27,14 +27,15 @@ public:
     float const speed = 1;
     float const rotPerTimeStep = 0.5e-2;
     float const timeStep = 15000; // in microseconds
+    //unsigned const segments;
 private:
     float scale, posX, posY, velocityX, velocityY, orientation, nextOrientation;
     float nextPosX, nextPosY;
     bool isVisible;
     unsigned int timeSinceLastUpdate; 
     //unsigned int size = 1;
-    std::vector<float> const genVerts();
-    std::vector<GLuint> const genElts();
+    std::vector<float> const genVerts(unsigned int segments);
+    std::vector<GLuint> const genElts(unsigned int segments);
 };
 
 #endif
