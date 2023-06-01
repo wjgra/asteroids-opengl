@@ -1,4 +1,5 @@
 #include "../include/drawable.hpp"
+#include <iostream>
 
 Drawable::Drawable(const std::vector<float>& verts, const std::vector<GLuint>& elts): vertices{verts}, elements{elts}
 {
@@ -47,7 +48,9 @@ GLuint const *Drawable::getElements() const{
 }
 
 void Drawable::draw(){
+    //std::cout << "VAO: " <<VAO <<"\n";
     glBindVertexArray(VAO);
+    //std::cout << "Size: " <<elements.size() <<"\n";
     glDrawElementsInstanced(GL_LINE_STRIP, elements.size(), GL_UNSIGNED_INT, 0, 9);
     glBindVertexArray(0);
 }

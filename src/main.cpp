@@ -87,14 +87,41 @@ int main(int argc, char* argv[]){
     Ship ship(shipScale, gameState.winWidth/2.0f, gameState.winHeight/2.0f);
     gameState.ship = &ship; // Set pointer to ship object in gamestate
 
-    Asteroid asteroid(shipScale*2.0f, gameState.winWidth/4.0f, gameState.winHeight/2.0f, -piValue/4.0f, 11);
-
     // Compile shaders for ship
     ShaderProgram wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag");
     wrapShader.useProgram();
 
     ship.setUpBuffers();
+
+    unsigned int const numAsteroids = 25;
+    std::vector<Asteroid> asteroidList;
+    for (unsigned int i = 0; i < numAsteroids ; ++i){
+        float temp = i/(float)numAsteroids;
+        asteroidList.emplace_back(shipScale*2.0f*(0.5f+temp), 
+            gameState.winWidth*temp, 
+            gameState.winHeight*temp, 
+            2*piValue*temp, 
+            8+(i%10));
+    }
+
+
+    /*
+    Asteroid asteroid(shipScale*2.0f,gameState.winWidth/4.0f, gameState.winHeight/2.0f, piValue/4.0f, 11);
+
+    
+
+    Asteroid asteroid2(shipScale*1.5f,gameState.winWidth/2.0f, gameState.winHeight/1.5f, -2*piValue/3.0f, 7);
+
+    std::vector<Asteroid> asteroidList{asteroid, asteroid2};
     asteroid.setUpBuffers();
+    asteroid2.setUpBuffers();    
+    */
+    
+    for (Asteroid& ast : asteroidList)
+    {  
+         ast.setUpBuffers();
+    }    
+    
 
     /*
     // Set up buffer objects for ship
@@ -195,10 +222,22 @@ int main(int argc, char* argv[]){
 
         // Draw ship
         ship.draw();
-
+        /*
         trans = asteroid.getTransMatrix(frameTime);
         glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
         asteroid.draw();
+
+        trans = asteroid2.getTransMatrix(frameTime);
+        glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+        asteroid2.draw();
+        */
+       
+        for (Asteroid& ast : asteroidList)
+        {
+           trans = ast.getTransMatrix(frameTime);
+           glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+           ast.draw();
+        }    
 
         //glDrawElementsInstanced(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0, 9);
         // Swap buffers
@@ -212,7 +251,12 @@ int main(int argc, char* argv[]){
     glDeleteBuffers(1, &EBO);
     */
     ship.releaseBuffers();
-    asteroid.releaseBuffers();
+    //asteroid.releaseBuffers();
+    //asteroid2.releaseBuffers();
+    for (Asteroid& ast : asteroidList)
+    {
+        ast.releaseBuffers();
+    }
     SDL_GL_DeleteContext(gameState.context);
     SDL_DestroyWindow(gameState.window);
     SDL_Quit();
