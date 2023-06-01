@@ -18,6 +18,7 @@
 
 #include "../include/shader_program.hpp"
 #include "../include/ship.hpp"
+#include "../include/asteroid.hpp"
 #include "../include/game_state.hpp"
 
 static void handleEvents(SDL_Event event, GameState& gState);
@@ -84,11 +85,15 @@ int main(int argc, char* argv[]){
     Ship ship(shipScale, gameState.winWidth/2.0f, gameState.winHeight/2.0f);
     gameState.ship = &ship; // Set pointer to ship object in gamestate
 
+    Asteroid asteroid(shipScale*2.0f, gameState.winWidth/4.0f, gameState.winHeight/2.0f);
+
     // Compile shaders for ship
-    ShaderProgram shipShader(".//shaders//vertex.vert", ".//shaders//fragment.frag");
-    shipShader.useProgram();
+    ShaderProgram wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag");
+    wrapShader.useProgram();
 
     ship.setUpBuffers();
+    asteroid.setUpBuffers();
+
     /*
     // Set up buffer objects for ship
     GLuint VBO, EBO, VAO;
@@ -113,8 +118,8 @@ int main(int argc, char* argv[]){
     glBindVertexArray(0);
     */
     // Get locations of model/projection matrices
-    GLint uniformModelTrans = shipShader.getUniformLocation("model");
-    GLint uniformProjTrans = shipShader.getUniformLocation("projection");
+    GLint uniformModelTrans = wrapShader.getUniformLocation("model");
+    GLint uniformProjTrans = wrapShader.getUniformLocation("projection");
 
     // Set orthogonal projection matrix
     glm::mat4 projection = glm::ortho(0.0f, (float)gameState.winWidth, (float)gameState.winHeight, 0.0f, -1.0f, 1.0f); 
@@ -135,7 +140,7 @@ int main(int argc, char* argv[]){
 
     // Copy offsets to uniform variables
     for (int i = 0; i < 9; ++i){
-        GLint offsetLocation = shipShader.getUniformLocation("offsets["+std::to_string(i)+"]");
+        GLint offsetLocation = wrapShader.getUniformLocation("offsets["+std::to_string(i)+"]");
         glUniform2fv(offsetLocation,1,glm::value_ptr(instanceOffsets[i]));
     }    
 
@@ -180,7 +185,7 @@ int main(int argc, char* argv[]){
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Prepare to render
-        shipShader.useProgram();
+        wrapShader.useProgram();
 
         // Update ship transformation matrix
         glm::mat4 trans = ship.getTransMatrix(frameTime);
@@ -188,6 +193,11 @@ int main(int argc, char* argv[]){
 
         // Draw ship
         ship.draw();
+
+        trans = asteroid.getTransMatrix(frameTime);
+        glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+        asteroid.draw();
+
         //glDrawElementsInstanced(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0, 9);
         // Swap buffers
         SDL_GL_SwapWindow(gameState.window);
@@ -200,6 +210,7 @@ int main(int argc, char* argv[]){
     glDeleteBuffers(1, &EBO);
     */
     ship.releaseBuffers();
+    asteroid.releaseBuffers();
     SDL_GL_DeleteContext(gameState.context);
     SDL_DestroyWindow(gameState.window);
     SDL_Quit();

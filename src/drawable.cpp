@@ -48,6 +48,6 @@ GLuint const *Drawable::getElements() const{
 
 void Drawable::draw(){
     glBindVertexArray(VAO);
-    glDrawElementsInstanced(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0, 9);
+    glDrawElementsInstanced(GL_LINE_STRIP, elements.size(), GL_UNSIGNED_INT, 0, 9);
     glBindVertexArray(0);
 }
