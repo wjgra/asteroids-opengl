@@ -97,13 +97,25 @@ std::vector<float> const Asteroid::genVerts(unsigned int segments){
     // Set up mesh data
     std::vector<float> temp(2*segments);
     float const unitAngle = 2*piValue/segments;
+    
+    /*float const tempX = 1.0f, tempY = 0.0f;
+    for (unsigned int i = 0; i<segments; ++i){
+        float radiusScale = 0.7f + 0.6f*(rand()%11)/10.0f;
+
+        float rotAngle = unitAngle*i;
+        temp[2*i] = radiusScale*(tempX*cos(rotAngle)-tempY*sin(rotAngle));
+        temp[2*i+1] = radiusScale*(tempX*sin(rotAngle)+tempY*cos(rotAngle));
+    }
+    
+    return temp;*/
+
     float tempX = 1.0f, tempY = 0.0f;
     for (unsigned int i = 0; i<segments; ++i){
         temp[2*i] = tempX;
         temp[2*i+1] = tempY;
         float tempVal = tempX*cos(unitAngle)-tempY*sin(unitAngle);
 
-        float radiusScale = 0.7f + 0.6f*(rand()%11)/10.0f;
+        float radiusScale = 0.75f + 0.5f*(rand()%11)/10.0f;
 
         tempY = radiusScale*tempX*sin(unitAngle)+tempY*cos(unitAngle);
         tempX = radiusScale*tempVal;
