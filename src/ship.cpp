@@ -9,7 +9,8 @@ Ship::Ship(float s, float pX, float pY):
         -0.25f, 0.0f, // rear centre
         -0.5f, -0.5f // rear left
     }, 
-    {0,1,2,3,0}), 
+    {0,1,2,3,0}/*,
+    {0.5f, 0.6f, 1.0f, 1.0f}*/), 
     scale(s), posX(pX), posY(pY){
     velocityX = 0.0f;
     velocityY = 0.0f;

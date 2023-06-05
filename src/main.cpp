@@ -171,7 +171,10 @@ int main(int argc, char* argv[]){
     for (int i = 0; i < 9; ++i){
         GLint offsetLocation = wrapShader.getUniformLocation("offsets["+std::to_string(i)+"]");
         glUniform2fv(offsetLocation,1,glm::value_ptr(instanceOffsets[i]));
-    }    
+    }
+
+    // Get location of colour uniform
+    GLint uniformColour = wrapShader.getUniformLocation("inputColour");    
 
     // Loop variables
     SDL_Event event;
@@ -220,6 +223,9 @@ int main(int argc, char* argv[]){
         glm::mat4 trans = ship.getTransMatrix(frameTime);
         glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
 
+        // Set draw colour
+        glUniform4f(uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
+
         // Draw ship
         ship.draw();
         /*
@@ -232,6 +238,8 @@ int main(int argc, char* argv[]){
         asteroid2.draw();
         */
        
+        // Set draw colour
+        glUniform4f(uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
         for (Asteroid& ast : asteroidList)
         {
            trans = ast.getTransMatrix(frameTime);

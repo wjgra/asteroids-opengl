@@ -1,7 +1,7 @@
 #include "../include/drawable.hpp"
 #include <iostream>
 
-Drawable::Drawable(const std::vector<float>& verts, const std::vector<GLuint>& elts): vertices{verts}, elements{elts}
+Drawable::Drawable(const std::vector<float>& verts, const std::vector<GLuint>& elts/*, const glm::vec4& col = glm::vec4({1.0f, 1.0f, 1.0f, 1.0f})*/): vertices{verts}, elements{elts}/*, lineColour{col}*/
 {
 }
 
