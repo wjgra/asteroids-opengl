@@ -3,10 +3,14 @@
 
 #include "../include/glad/glad.h"
 #include "../include/ship.hpp"
+#include "../include/asteroid.hpp"
 #include <SDL.h>
 #include <SDL_opengl.h>
 
-struct GameState{
+class GameState{
+public:
+    GameState(int scale);
+    ~GameState();
     // Window state variables
     SDL_Window* window;
     bool fullScreen = false;
@@ -17,10 +21,25 @@ struct GameState{
     int const winWidth = 640;
     int const winHeight = 480;
     // -- Resolution is winScale * notional dimension
-    unsigned int winScale = 1;
+    unsigned int const winScale = 1;
     // Game state variables
-    Ship* ship = nullptr;
+    std::unique_ptr<Ship> ship;
+    std::vector<std::unique_ptr<Asteroid>> asteroids;
     bool quit = false;
 };
+
+GameState::GameState(int scale = 1) : winScale(scale){
+    // Create ship object at centre of screen, length 1/40th of screenwidth
+    float const shipScale = float(winWidth)/40;
+    ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f);
+
+    
+
+    Ship ship();
+}
+
+GameState::~GameState(){
+
+}
 
 #endif
