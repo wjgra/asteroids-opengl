@@ -48,9 +48,11 @@ GLuint const *Drawable::getElements() const{
 }
 
 void Drawable::draw(){
-    //std::cout << "VAO: " <<VAO <<"\n";
     glBindVertexArray(VAO);
-    //std::cout << "Size: " <<elements.size() <<"\n";
-    glDrawElementsInstanced(GL_LINE_STRIP, elements.size(), GL_UNSIGNED_INT, 0, 9);
+    glDrawElementsInstanced(drawingMode, elements.size(), GL_UNSIGNED_INT, 0, 9);
     glBindVertexArray(0);
+}
+
+void Drawable::setDrawingMode(GLint mode){
+    drawingMode = mode;
 }

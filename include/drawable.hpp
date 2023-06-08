@@ -22,10 +22,12 @@ public:
     float const *getVertices() const;
     GLuint const *getElements() const;
     void draw();
+    void setDrawingMode(GLint mode);
 //private:
     std::vector<float> const vertices;
     std::vector<GLuint> const elements;
     GLuint VBO, EBO, VAO;
+    GLint drawingMode = GL_LINE_STRIP;
     //glm::vec4 lineColour;
     //GLint uniformLineColour;
 };

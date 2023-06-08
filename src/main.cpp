@@ -228,15 +228,26 @@ int main(int argc, char* argv[]){
 
         // Draw ship
         ship.draw();
-        /*
-        trans = asteroid.getTransMatrix(frameTime);
-        glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-        asteroid.draw();
 
-        trans = asteroid2.getTransMatrix(frameTime);
-        glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-        asteroid2.draw();
-        */
+        // Draw missiles
+        glUniform4f(uniformColour, 0.3f, 0.4f, 1.0f, 1.0f);
+        for (auto mis = ship.missiles.begin(); mis < ship.missiles.end(); /*no increment due to potential erasing*/){
+            
+            trans = (*mis)->getTransMatrix(frameTime);
+            if ((*mis)->destroyThisFrame()){
+                mis = ship.missiles.erase(mis);
+            }
+            else{
+                glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+                /*std::cout << (*mis)->posX <<"\n";
+                std::cout << (*mis)->posY <<"\n";
+                std::cout << (*mis)->vertices.size() << "\n";
+                std::cout << (*mis)->elements.size() << "\n";
+                std::cout << glm::to_string(trans) <<"\n";*/
+                (*mis)->draw();
+                ++mis;
+            }
+        }
        
         // Set draw colour
         glUniform4f(uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
@@ -302,6 +313,9 @@ static void handleEvents(SDL_Event event, GameState& gState){
                 case SDL_SCANCODE_UP:
                     gState.ship->thrustForward(true);
                     break;
+                case SDL_SCANCODE_DOWN:
+                    gState.ship->shootMissile(true);
+                    break;
                 default:
                     break;
             }
@@ -316,6 +330,9 @@ static void handleEvents(SDL_Event event, GameState& gState){
                     break;
                 case SDL_SCANCODE_UP:
                     gState.ship->thrustForward(false);
+                    break;
+                case SDL_SCANCODE_DOWN:
+                    gState.ship->shootMissile(false);
                     break;
                 default:
                     break;

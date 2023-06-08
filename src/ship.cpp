@@ -18,8 +18,10 @@ Ship::Ship(float s, float pX, float pY):
     isVisible = false;
     isThrusting = false;
     timeSinceLastUpdate = 0;
+    timeSinceLastShot = minShootingInterval+1;
     isTurningLeft = false;
     isTurningRight = false;
+    isShooting = false;
     updateNextPos();
 }
 
@@ -73,10 +75,11 @@ void Ship::updateNextPos(){
 
 // Returns a transformation matrix by interpolating between the current 
 // and next position using the frame length.
-glm::mat4 Ship::getTransMatrix(unsigned int frameTime){
+glm::mat4 Ship::getTransMatrix(unsigned int frameTime){ // To do: consider separating update code from trans matric code
     // Update positions/velocities if timeStep passed since last update
-    timeSinceLastUpdate += frameTime;   
-    int count = 0;
+    // int count = 0;
+    timeSinceLastUpdate += frameTime;
+    timeSinceLastShot += frameTime;
     while (timeSinceLastUpdate >= timeStep){
         posX = nextPosX;
         posY = nextPosY;
@@ -84,8 +87,9 @@ glm::mat4 Ship::getTransMatrix(unsigned int frameTime){
         velocityY = nextVelocityY;
         orientation = nextOrientation;
         updateNextPos();
+        updateMissiles();
         timeSinceLastUpdate -= timeStep;
-        count++;
+        // count++;
     }
     
     /*// Alert if more than two updates performed per frame    
@@ -110,6 +114,8 @@ glm::mat4 Ship::getTransMatrix(unsigned int frameTime){
         posY += 480;
         nextPosY += 480;
     }
+
+    // **** possible split ****
 
     // Linearly interpolate position and orientation
     float tInterp = float(timeSinceLastUpdate)/float(timeStep);
@@ -159,4 +165,29 @@ void Ship::setVisibility(bool visibility){
 // Returns the current visibility of the ship (currently unused).
 bool Ship::getVisibility() const{
     return isVisible;
+}
+
+// Sets the current shooting state of the ship.
+void Ship::shootMissile( bool shooting){
+    isShooting = shooting;
+}
+
+// Spawns a missile at current timestep if shooting and sufficient time passed.
+void Ship::updateMissiles(){
+    if (isShooting && (timeSinceLastShot >= minShootingInterval)){
+        spawnMissile();
+        timeSinceLastShot = 0;
+    }
+    else{
+        timeSinceLastShot += timeStep;
+    }
+}
+
+
+// Creates a missile at posX, posY at the beginning of the timeStep
+void Ship::spawnMissile(){
+    std::unique_ptr<Missile> newMissile = std::make_unique<Missile>(scale, posX, posY, orientation, velocityX, velocityY);
+    newMissile->setUpBuffers();
+    missiles.push_back(std::move(newMissile));
+    timeSinceLastShot = 0;
 }

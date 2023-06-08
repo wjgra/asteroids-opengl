@@ -31,14 +31,14 @@ void Asteroid::updateNextPos(){
 glm::mat4 Asteroid::getTransMatrix(unsigned int frameTime){
     // Update positions/velocities if timeStep passed since last update
     timeSinceLastUpdate += frameTime;   
-    int count = 0;
+    //int count = 0;
     while (timeSinceLastUpdate >= timeStep){
         posX = nextPosX;
         posY = nextPosY;
         orientation = nextOrientation;
         updateNextPos();
         timeSinceLastUpdate -= timeStep;
-        count++;
+        //count++;
     }
     
     /*// Alert if more than two updates performed per frame    
