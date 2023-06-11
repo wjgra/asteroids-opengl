@@ -4,8 +4,7 @@
 #include "../include/glad/glad.h"
 #include "../include/ship.hpp"
 #include "../include/asteroid.hpp"
-#include <SDL.h>
-#include <SDL_opengl.h>
+#include "../include/context.hpp"
 
 class GameState{
 public:
@@ -39,7 +38,15 @@ GameState::GameState(int scale = 1) : winScale(scale){
 }
 
 GameState::~GameState(){
+    ship->releaseBuffers();
 
+    for (auto&& ast : asteroids)
+    {
+        ast->releaseBuffers();
+    }
+    SDL_GL_DeleteContext(context);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 }
 
 #endif

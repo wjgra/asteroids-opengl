@@ -27,8 +27,7 @@ static void handleEvents(SDL_Event event, GameState& gState);
 
 int main(int argc, char* argv[]){
     // Initialise gamestate struct
-    GameState gameState = {};
-    gameState.winScale = 2;
+    GameState gameState(2);
 
     // Initialise SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0){
@@ -262,23 +261,7 @@ int main(int argc, char* argv[]){
         // Swap buffers
         SDL_GL_SwapWindow(gameState.window);
     }
-
-    /*
-    // Cleanup
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    */
-    ship.releaseBuffers();
-    //asteroid.releaseBuffers();
-    //asteroid2.releaseBuffers();
-    for (Asteroid& ast : asteroidList)
-    {
-        ast.releaseBuffers();
-    }
-    SDL_GL_DeleteContext(gameState.context);
-    SDL_DestroyWindow(gameState.window);
-    SDL_Quit();
+    
 
     return EXIT_SUCCESS;
 }

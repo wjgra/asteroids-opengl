@@ -3,9 +3,11 @@
 
 Drawable::Drawable(const std::vector<float>& verts, const std::vector<GLuint>& elts/*, const glm::vec4& col = glm::vec4({1.0f, 1.0f, 1.0f, 1.0f})*/): vertices{verts}, elements{elts}/*, lineColour{col}*/
 {
+    setUpBuffers();
 }
 
 Drawable::~Drawable(){
+    releaseBuffers();
 }
 
 void Drawable::setUpBuffers(){
