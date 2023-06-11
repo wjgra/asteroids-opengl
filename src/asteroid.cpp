@@ -10,6 +10,7 @@ Asteroid::Asteroid(float s, float pX, float pY, float dir, unsigned int segs):
     velocityY = speed*sin(dir);
     isVisible = false;
     timeSinceLastUpdate = 0;
+    maxRadius = 1.25*s; //temp!
     updateNextPos();
 }
 

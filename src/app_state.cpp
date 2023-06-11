@@ -27,16 +27,16 @@ void AppState::handleEvents(SDL_Event const&  event){
                     window.toggleFullScreen();
                     break;
                 case SDL_SCANCODE_LEFT:
-                    gameState.ship.turnLeft(true);
+                    gameState.ship->turnLeft(true);
                     break;
                 case SDL_SCANCODE_RIGHT:
-                    gameState.ship.turnRight(true);
+                    gameState.ship->turnRight(true);
                     break;
                 case SDL_SCANCODE_UP:
-                    gameState.ship.thrustForward(true);
+                    gameState.ship->thrustForward(true);
                     break;
                 case SDL_SCANCODE_DOWN:
-                    gameState.ship.shootMissile(true);
+                    gameState.ship->shootMissile(true);
                     break;
                 default:
                     break;
@@ -45,16 +45,16 @@ void AppState::handleEvents(SDL_Event const&  event){
         case SDL_KEYUP:
             switch(event.key.keysym.scancode){
                 case SDL_SCANCODE_LEFT:
-                    gameState.ship.turnLeft(false);
+                    gameState.ship->turnLeft(false);
                     break;
                 case SDL_SCANCODE_RIGHT:
-                    gameState.ship.turnRight(false);
+                    gameState.ship->turnRight(false);
                     break;
                 case SDL_SCANCODE_UP:
-                    gameState.ship.thrustForward(false);
+                    gameState.ship->thrustForward(false);
                     break;
                 case SDL_SCANCODE_DOWN:
-                    gameState.ship.shootMissile(false);
+                    gameState.ship->shootMissile(false);
                     break;
                 default:
                     break;

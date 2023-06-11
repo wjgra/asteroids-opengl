@@ -11,7 +11,7 @@ GameState::GameState(unsigned int width, unsigned int height) :
     ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f);
 
     // Create asteroids (temporary random selection)
-    unsigned int const numAsteroids = 25;
+    unsigned int const numAsteroids = 6;
     for (unsigned int i = 0; i < numAsteroids ; ++i){
         float temp = (float)i/(float)numAsteroids;
         std::unique_ptr<Asteroid> tempAst = std::make_unique<Asteroid>(shipScale*2.0f*(0.5f+temp), 

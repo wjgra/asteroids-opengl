@@ -28,6 +28,7 @@ public:
     float const rotPerTimeStep = 0.5e-2;
     float const timeStep = 15000; // in microseconds
     //unsigned const segments;
+    float maxRadius; // temp!
 private:
     float scale, posX, posY, velocityX, velocityY, orientation, nextOrientation;
     float nextPosX, nextPosY;

@@ -23,10 +23,11 @@ public:
     bool destroyThisFrame();
 //private:
     float scale, posX, posY, velocityX, velocityY, nextPosX, nextPosY, orientation;
-    unsigned int timeSinceLastUpdate, shotDuration, timeUntilDestroyed;
-    unsigned int lifetime = 800000;
+    unsigned int timeSinceLastUpdate;
+    unsigned int shotDuration, timeUntilDestroyed;
     float missileSpeed = 6.0f/10000.0f;
-    float timeStep = 15000; // in microseconds
+    unsigned int timeStep = 15000; // in microseconds
+    unsigned int lifetime = 50 * timeStep;
     bool toBeDestroyed;
 };
 
