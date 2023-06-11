@@ -21,7 +21,7 @@ Missile::Missile(float s, float pX, float pY, float dir, float shipVelX, float s
 }
 
 Missile::~Missile(){
-    releaseBuffers();
+    // releaseBuffers();
 }
 
 void Missile::updateNextPos(){

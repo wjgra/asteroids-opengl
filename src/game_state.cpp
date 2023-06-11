@@ -6,28 +6,21 @@ GameState::GameState(unsigned int width, unsigned int height) :
     winWidth{width},
     winHeight{height},
     shipScale{float(winWidth)/40.0f},
-    ship(shipScale, winWidth/2.0f, winHeight/2.0f),
     wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag")    
 {
+    ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f);
 
-    ship.setUpBuffers();
-
-    // Create asteroids
-    unsigned int const numAsteroids = 6;
+    // Create asteroids (temporary random selection)
+    unsigned int const numAsteroids = 25;
     for (unsigned int i = 0; i < numAsteroids ; ++i){
-        //std::cout << "Creating asteroid " << i <<" (" <<8+(i%10)<<")\n";
         float temp = (float)i/(float)numAsteroids;
-        asteroids.emplace_back(shipScale*2.0f*(0.5f+temp), 
+        std::unique_ptr<Asteroid> tempAst = std::make_unique<Asteroid>(shipScale*2.0f*(0.5f+temp), 
             winWidth*temp, 
             winHeight*temp, 
             2*piValue*temp, 
             8+(i%10));
+        asteroids.push_back(std::move(tempAst));
     }
-
-    for (Asteroid& ast : asteroids)
-    {  
-            ast.setUpBuffers();
-    } 
 
     // Activate shader to initialise uniforms
     wrapShader.useProgram();
@@ -72,9 +65,50 @@ GameState::GameState(unsigned int width, unsigned int height) :
 }
 
 GameState::~GameState(){
-    ship.releaseBuffers();
-    for (Asteroid& ast : asteroids)
-        {
-            ast.releaseBuffers();
+}
+
+void GameState::frame(unsigned int frameTime){
+    // Prepare to render
+    wrapShader.useProgram();
+
+    // Update ship transformation matrix
+    glm::mat4 trans = ship->getTransMatrix(frameTime);
+    glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+
+    // Set draw colour
+    glUniform4f(uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
+
+    // Draw ship
+    ship->draw();
+
+    // Draw missiles
+    glUniform4f(uniformColour, 0.3f, 0.4f, 1.0f, 1.0f);
+    for (auto mis = ship->missiles.begin(); mis < ship->missiles.end(); /*no increment due to potential erasing*/){
+        
+        trans = (*mis)->getTransMatrix(frameTime);
+        if ((*mis)->destroyThisFrame()){
+            mis = ship->missiles.erase(mis);
         }
+        else{
+            glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+
+            (*mis)->draw();
+            ++mis;
+        }
+    }
+
+    // Set draw colour
+    glUniform4f(uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
+    //int count = 0;
+    for (auto&& ast : asteroids)
+    {
+        //std::cout << "Drawing asteroid " <<count;count++;
+        trans = ast->getTransMatrix(frameTime);
+        //std::cout <<".";
+        glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+        //std::cout <<".";
+        ast->draw();
+        //std::cout <<".\n";
+    }    
+
 }

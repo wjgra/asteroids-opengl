@@ -187,7 +187,7 @@ void Ship::updateMissiles(){
 // Creates a missile at posX, posY at the beginning of the timeStep
 void Ship::spawnMissile(){
     std::unique_ptr<Missile> newMissile = std::make_unique<Missile>(scale, posX, posY, orientation, velocityX, velocityY);
-    newMissile->setUpBuffers();
+    //newMissile->setUpBuffers();
     missiles.push_back(std::move(newMissile));
     timeSinceLastShot = 0;
 }

@@ -23,8 +23,8 @@ public:
     GLint uniformProjTrans;
     GLint uniformColour;
     // Drawable game objects
-    Ship ship;
-    std::vector<Asteroid> asteroids;
+    std::unique_ptr<Ship> ship;
+    std::vector<std::unique_ptr<Asteroid>> asteroids;
     // Shaders
     ShaderProgram wrapShader;
 };

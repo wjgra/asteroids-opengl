@@ -67,54 +67,15 @@ void AppState::handleEvents(SDL_Event const&  event){
 
 void AppState::frame(unsigned int frameTime){ // Move to app state frame()
     // Clear buffer
-            glClearColor(0.0f, 0.0f, 0.0f, 1.f);
-            glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-            // Prepare to render
-            gameState.wrapShader.useProgram();
+    // Draw game objects
+    gameState.frame(frameTime);
+    
+    // Swap buffers
+    SDL_GL_SwapWindow(window.getWindow());
 
-            // Update ship transformation matrix
-            glm::mat4 trans = gameState.ship.getTransMatrix(frameTime);
-            glUniformMatrix4fv(gameState.uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-
-            // Set draw colour
-            glUniform4f(gameState.uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
-
-            // Draw ship
-            gameState.ship.draw();
-
-            // Draw missiles
-            glUniform4f(gameState.uniformColour, 0.3f, 0.4f, 1.0f, 1.0f);
-            for (auto mis = gameState.ship.missiles.begin(); mis < gameState.ship.missiles.end(); /*no increment due to potential erasing*/){
-                
-                trans = (*mis)->getTransMatrix(frameTime);
-                if ((*mis)->destroyThisFrame()){
-                    mis = gameState.ship.missiles.erase(mis);
-                }
-                else{
-                    glUniformMatrix4fv(gameState.uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
- 
-                    (*mis)->draw();
-                    ++mis;
-                }
-            }
-        
-            // Set draw colour
-            glUniform4f(gameState.uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
-            //int count = 0;
-            for (Asteroid& ast : gameState.asteroids)
-            {
-                //std::cout << "Drawing asteroid " <<count;count++;
-                trans = ast.getTransMatrix(frameTime);
-                //std::cout <<".";
-                glUniformMatrix4fv(gameState.uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-                //std::cout <<".";
-                ast.draw();
-                //std::cout <<".\n";
-            }    
-
-            // Swap buffers
-            SDL_GL_SwapWindow(window.getWindow());
-
-            window.frame(frameTime);
+    // Update FPS counter
+    window.frame(frameTime);
 }
