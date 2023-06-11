@@ -54,21 +54,10 @@ int main(int argc, char* argv[]){
                 std::cout << "Frame hit maximum duration!\n";
             }
 
-            // Calculate average frame length and FPS for display in title bar
-            accumulatedFrameTime += frameTime;
-            ++numFrames;
-            if (accumulatedFrameTime > 1000000){ // every second
-                float avgFrameTime = accumulatedFrameTime / ((float)numFrames*1000.0f); // in ms
-                int FPS = int(1000.0f/avgFrameTime);
-                SDL_SetWindowTitle(appState.window.getWindow(), 
-                    std::string("Asteroids - FPS: "+std::to_string(FPS)+" ("+std::to_string(avgFrameTime)+" ms)").c_str());
-                accumulatedFrameTime = 0;
-                numFrames = 0;
-            }
+            
             t_start = t_now;
 
             appState.frame(frameTime);
-            
         }
 
     }

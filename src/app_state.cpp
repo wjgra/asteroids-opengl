@@ -120,4 +120,6 @@ void AppState::frame(unsigned int frameTime){ // Move to app state frame()
             //glDrawElementsInstanced(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0, 9);
             // Swap buffers
             SDL_GL_SwapWindow(window.getWindow());
+
+            window.frame(frameTime);
 }

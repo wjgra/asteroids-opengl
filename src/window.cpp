@@ -49,3 +49,17 @@ void Window::toggleFullScreen(){
         SDL_SetWindowFullscreen(window, winFlags);
     }
 }
+
+void Window::frame(unsigned int frameTime){
+    // Calculate average frame length and FPS for display in title bar
+    accumulatedFrameTime += frameTime;
+    ++numFrames;
+    if (accumulatedFrameTime > 1000000){ // every second
+        float avgFrameTime = (float)accumulatedFrameTime / ((float)numFrames*1000.0f); // in ms
+        int FPS = int(1000.0f/avgFrameTime);
+        SDL_SetWindowTitle(window, 
+            std::string("Asteroids - FPS: "+std::to_string(FPS)+" ("+std::to_string(avgFrameTime)+" ms)").c_str());
+        accumulatedFrameTime = 0;
+        numFrames = 0;
+    }
+}
