@@ -13,7 +13,7 @@ GameState::GameState(unsigned int width, unsigned int height) :
     ship.setUpBuffers();
 
     // Create asteroids
-    unsigned int const numAsteroids = 25;
+    unsigned int const numAsteroids = 6;
     for (unsigned int i = 0; i < numAsteroids ; ++i){
         //std::cout << "Creating asteroid " << i <<" (" <<8+(i%10)<<")\n";
         float temp = (float)i/(float)numAsteroids;

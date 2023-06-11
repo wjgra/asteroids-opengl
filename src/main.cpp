@@ -25,167 +25,12 @@
 
 static float const piValue = 3.1415926535897932385;
 
-//static void handleEvents(SDL_Event event, GameState& gState);
-
 int main(int argc, char* argv[]){
-    /*
-    // Initialise gamestate struct
-    GameState gameState = {};
-    gameState.winScale = 2;
 
-    // Initialise SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0){
-        std::cout << "Failed to initialise SDL\n";
-        return EXIT_FAILURE;
-    }
-    SDL_GL_LoadLibrary(nullptr);
-    */
     try{
         // Initialise window, openGL context and game state
         AppState appState(2);
         
-
-        
-        /*
-        // Create window
-        gameState.window = SDL_CreateWindow(
-            "Asteroids", 
-            SDL_WINDOWPOS_CENTERED, 
-            SDL_WINDOWPOS_CENTERED, 
-            gameState.winScale*gameState.winWidth, 
-            gameState.winScale*gameState.winHeight, 
-            gameState.winFlags);
-
-        if (!gameState.window){
-            std::cout << "Failed to create window\n";
-            return EXIT_FAILURE;
-        }
-
-        */
-    /*
-        // Create OpenGL context
-        gameState.context = SDL_GL_CreateContext(gameState.window);
-        if (!gameState.context){
-            std::cout << "Failed to create OpenGL context\n";
-            return EXIT_FAILURE;
-        }
-        std::cout << "OpenGL loaded\n";
-
-        // Load OpenGL functions with GLAD
-        gladLoadGLLoader(SDL_GL_GetProcAddress);
-
-        // Display device information
-        printf("Vendor:   %s\n", glGetString(GL_VENDOR));
-        printf("Renderer: %s\n", glGetString(GL_RENDERER));
-        printf("Version:  %s\n", glGetString(GL_VERSION));
-
-        // Set v-sync (to do: add toggle for v-sync?)
-        SDL_GL_SetSwapInterval(gameState.useVsync);
-
-        // Set viewport size (to do: allow resizable viewport?)
-        glViewport(0, 0, gameState.winScale*gameState.winWidth, gameState.winScale*gameState.winHeight);
-        
-        */
-        // Create ship object at centre of screen, length 1/40th of screenwidth
-        //float shipScale = float(gameState.winWidth)/40;
-
-        //Ship ship(shipScale, gameState.winWidth/2.0f, gameState.winHeight/2.0f);
-        //gameState.ship = &ship; // Set pointer to ship object in gamestate
-
-
-
-        //ship.setUpBuffers(); // move to drawable
-
-        /*
-        unsigned int const numAsteroids = 25;
-        std::vector<Asteroid> asteroidList;
-        for (unsigned int i = 0; i < numAsteroids ; ++i){
-            float temp = i/(float)numAsteroids;
-            asteroidList.emplace_back(shipScale*2.0f*(0.5f+temp), 
-                gameState.winWidth*temp, 
-                gameState.winHeight*temp, 
-                2*piValue*temp, 
-                8+(i%10));
-        }
-        */
-
-        /*
-        Asteroid asteroid(shipScale*2.0f,gameState.winWidth/4.0f, gameState.winHeight/2.0f, piValue/4.0f, 11);
-
-        
-
-        Asteroid asteroid2(shipScale*1.5f,gameState.winWidth/2.0f, gameState.winHeight/1.5f, -2*piValue/3.0f, 7);
-
-        std::vector<Asteroid> asteroidList{asteroid, asteroid2};
-        asteroid.setUpBuffers();
-        asteroid2.setUpBuffers();    
-        */
-        /*
-        for (Asteroid& ast : asteroidList) // move to drawable
-        {  
-            ast.setUpBuffers();
-        }    
-        */
-
-        /*
-        // Set up buffer objects for ship
-        GLuint VBO, EBO, VAO;
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
-
-        // Bind VAO
-        glBindVertexArray(VAO); 
-
-        // Bind VBO and copy vertex data into VBO
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, ship.vertices.size()*sizeof(float), ship.vertices.data(), GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // Bind EBO and copy element data into EBO
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, ship.elements.size()*sizeof(GLuint), ship.elements.data(), GL_STATIC_DRAW);
-
-        // Unbind VAO
-        glBindVertexArray(0);
-        */
-       /*
-        // Compile shaders for ship
-        ShaderProgram wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag");
-        wrapShader.useProgram();
-        
-        
-        // Get locations of model/projection matrices
-        GLint uniformModelTrans = wrapShader.getUniformLocation("model");
-        GLint uniformProjTrans = wrapShader.getUniformLocation("projection");
-
-        // Set orthogonal projection matrix
-        glm::mat4 projection = glm::ortho(0.0f, (float)gameState.winWidth, (float)gameState.winHeight, 0.0f, -1.0f, 1.0f); 
-        glUniformMatrix4fv(uniformProjTrans, 1, GL_FALSE, glm::value_ptr(projection));
-
-        // Define offsets for instance-based screen wrap effect
-        glm::vec2 instanceOffsets[9] = {
-            glm::vec2(0.0f, 0.0f), // centre
-            glm::vec2((float)gameState.winWidth, 0.0f), // E
-            glm::vec2((float)gameState.winWidth, (float)gameState.winHeight), // NE
-            glm::vec2(0.0f, (float)gameState.winHeight), // N
-            glm::vec2(-(float)gameState.winWidth, (float)gameState.winHeight), // NW
-            glm::vec2(-(float)gameState.winWidth, 0.0f), // W
-            glm::vec2(-(float)gameState.winWidth, -(float)gameState.winHeight), // SW
-            glm::vec2(0.0f , -(float)gameState.winHeight), // S
-            glm::vec2((float)gameState.winWidth, -(float)gameState.winHeight) //SE
-        };
-
-        // Copy offsets to uniform variables
-        for (int i = 0; i < 9; ++i){
-            GLint offsetLocation = wrapShader.getUniformLocation("offsets["+std::to_string(i)+"]");
-            glUniform2fv(offsetLocation,1,glm::value_ptr(instanceOffsets[i]));
-        }
-
-        // Get location of colour uniform
-        GLint uniformColour = wrapShader.getUniformLocation("inputColour");    
-*/
         // Loop variables
         SDL_Event event;
         auto t_start = std::chrono::high_resolution_clock::now();
@@ -195,7 +40,6 @@ int main(int argc, char* argv[]){
         while (!appState.quit){
             // Handle event queue
             while (SDL_PollEvent(&event)){
-                //handleEvents(event, gameState);
                 appState.handleEvents(event);
             }
             
@@ -207,7 +51,7 @@ int main(int argc, char* argv[]){
             // prevent simulation and display getting too out of sync
             if (frameTime > 250000){
                 frameTime = 250000;
-                // std::cout << "Frame hit maximum duration!\n";
+                std::cout << "Frame hit maximum duration!\n";
             }
 
             // Calculate average frame length and FPS for display in title bar
@@ -224,132 +68,15 @@ int main(int argc, char* argv[]){
             t_start = t_now;
 
             appState.frame(frameTime);
-            /*
-            // Clear buffer
-            glClearColor(0.0f, 0.0f, 0.0f, 1.f);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            // Prepare to render
-            wrapShader.useProgram();
-
-            // Update ship transformation matrix
-            glm::mat4 trans = ship.getTransMatrix(frameTime);
-            glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-
-            // Set draw colour
-            glUniform4f(uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
-
-            // Draw ship
-            ship.draw();
-
-            // Draw missiles
-            glUniform4f(uniformColour, 0.3f, 0.4f, 1.0f, 1.0f);
-            for (auto mis = ship.missiles.begin(); mis < ship.missiles.end(); ){
-                
-                trans = (*mis)->getTransMatrix(frameTime);
-                if ((*mis)->destroyThisFrame()){
-                    mis = ship.missiles.erase(mis);
-                }
-                else{
-                    glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-            
-                    (*mis)->draw();
-                    ++mis;
-                }
-            }
-        
-            // Set draw colour
-            glUniform4f(uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
-            for (Asteroid& ast : asteroidList)
-            {
-            trans = ast.getTransMatrix(frameTime);
-            glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-            ast.draw();
-            }    
-
-            //glDrawElementsInstanced(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0, 9);
-            // Swap buffers
-            SDL_GL_SwapWindow(gameState.window);*/
             
         }
 
-        /*
-        // Cleanup
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
-        */
-        //ship.releaseBuffers();
-        //asteroid.releaseBuffers();
-        //asteroid2.releaseBuffers();
-        //for (Asteroid& ast : asteroidList)
-        //{
-           // ast.releaseBuffers();
-        //}
-        //SDL_GL_DeleteContext(gameState.context);
-        //SDL_DestroyWindow(gameState.window);
-        //SDL_Quit();
     }
     catch (const char* exception){
-        // Exit if failed to initialise
+        // Exit if failed to initialise appState
         std::cerr << exception << "\n";
         return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;
 }
-/*
-static void handleEvents(SDL_Event event, GameState& gState){
-    switch(event.type){
-        case SDL_QUIT:
-            gState.quit = true;
-            break;
-        //case SDL_WINDOWEVENT: // To do: handle window resize events
-            //break;
-        case SDL_KEYDOWN:
-            switch(event.key.keysym.scancode){
-                case SDL_SCANCODE_ESCAPE:
-                    gState.quit = true;
-                    break;
-                case SDL_SCANCODE_F11:
-                    appState.window.toggleFullScreen();
-                    break;
-                case SDL_SCANCODE_LEFT:
-                    gState.ship->turnLeft(true);
-                    break;
-                case SDL_SCANCODE_RIGHT:
-                    gState.ship->turnRight(true);
-                    break;
-                case SDL_SCANCODE_UP:
-                    gState.ship->thrustForward(true);
-                    break;
-                case SDL_SCANCODE_DOWN:
-                    gState.ship->shootMissile(true);
-                    break;
-                default:
-                    break;
-            }
-            break;
-        case SDL_KEYUP:
-            switch(event.key.keysym.scancode){
-                case SDL_SCANCODE_LEFT:
-                    gState.ship->turnLeft(false);
-                    break;
-                case SDL_SCANCODE_RIGHT:
-                    gState.ship->turnRight(false);
-                    break;
-                case SDL_SCANCODE_UP:
-                    gState.ship->thrustForward(false);
-                    break;
-                case SDL_SCANCODE_DOWN:
-                    gState.ship->shootMissile(false);
-                    break;
-                default:
-                    break;
-            }
-            break;
-        default:
-            break;
-    }
-}
-*/
