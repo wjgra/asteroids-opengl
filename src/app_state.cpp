@@ -93,11 +93,7 @@ void AppState::frame(unsigned int frameTime){ // Move to app state frame()
                 }
                 else{
                     glUniformMatrix4fv(gameState.uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-                    /*std::cout << (*mis)->posX <<"\n";
-                    std::cout << (*mis)->posY <<"\n";
-                    std::cout << (*mis)->vertices.size() << "\n";
-                    std::cout << (*mis)->elements.size() << "\n";
-                    std::cout << glm::to_string(trans) <<"\n";*/
+ 
                     (*mis)->draw();
                     ++mis;
                 }
@@ -105,7 +101,7 @@ void AppState::frame(unsigned int frameTime){ // Move to app state frame()
         
             // Set draw colour
             glUniform4f(gameState.uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
-            int count = 0;
+            //int count = 0;
             for (Asteroid& ast : gameState.asteroids)
             {
                 //std::cout << "Drawing asteroid " <<count;count++;
@@ -117,7 +113,6 @@ void AppState::frame(unsigned int frameTime){ // Move to app state frame()
                 //std::cout <<".\n";
             }    
 
-            //glDrawElementsInstanced(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0, 9);
             // Swap buffers
             SDL_GL_SwapWindow(window.getWindow());
 

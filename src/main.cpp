@@ -1,27 +1,16 @@
-#include "../include/glad/glad.h"
+//#include "../include/glad/glad.h"
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <SDL_main.h>
-#include <SDL_opengl.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+//#include <SDL_opengl.h>
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 
 #include <iostream>
 #include <chrono>
-#include <fstream>
-#include <string>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "../include/app_state.hpp"
-
-#include "../include/shader_program.hpp"
-#include "../include/ship.hpp"
-#include "../include/asteroid.hpp"
-#include "../include/game_state.hpp"
 
 static float const piValue = 3.1415926535897932385;
 
@@ -34,8 +23,6 @@ int main(int argc, char* argv[]){
         // Loop variables
         SDL_Event event;
         auto t_start = std::chrono::high_resolution_clock::now();
-        float accumulatedFrameTime = 0.0f;
-        unsigned int numFrames = 0;
 
         while (!appState.quit){
             // Handle event queue
@@ -54,7 +41,6 @@ int main(int argc, char* argv[]){
                 std::cout << "Frame hit maximum duration!\n";
             }
 
-            
             t_start = t_now;
 
             appState.frame(frameTime);
@@ -69,3 +55,7 @@ int main(int argc, char* argv[]){
 
     return EXIT_SUCCESS;
 }
+
+// To do:
+// - Rule of 3 for new classes
+// - Move setupbuffers/releasebuffers to constructor/destructor
