@@ -3,8 +3,9 @@
 static float const piValue = 3.1415926535897932385;
 
 Asteroid::Asteroid(float s, float pX, float pY, float dir, unsigned int segs): 
-    Drawable(genVerts(segs), genElts(segs)/*, {0.8f, 0.8f, 0.7f, 1.0f}*/),
-    scale{s}, posX{pX}, posY{pY}, orientation{dir}{
+    Drawable(genVerts(segs), genElts(segs)),
+    scale{s}, posX{pX}, posY{pY}, orientation{dir}
+{
     velocityX = speed*cos(dir);
     velocityY = speed*sin(dir);
     isVisible = false;

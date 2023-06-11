@@ -1,5 +1,5 @@
-#ifndef _ASTEROID_HPP_
-#define _ASTEROID_HPP_
+#ifndef _ASTEROIDS_ASTEROID_HPP_
+#define _ASTEROIDS_ASTEROID_HPP_
 
 #include "../include/glad/glad.h"
 #include "../include/drawable.hpp"

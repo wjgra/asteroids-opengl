@@ -1,5 +1,5 @@
-#ifndef _SHIP_HPP_
-#define _SHIP_HPP_
+#ifndef _ASTEROIDS_SHIP_HPP_
+#define _ASTEROIDS_SHIP_HPP_
 
 #include "../include/glad/glad.h"
 #include "../include/drawable.hpp"

@@ -1,5 +1,5 @@
-#ifndef _MISSILE_HPP_
-#define _MISSILE_HPP_
+#ifndef _ASTEROIDS_MISSILE_HPP_
+#define _ASTEROIDS_MISSILE_HPP_
 
 #include "../include/glad/glad.h"
 #include "../include/drawable.hpp"

@@ -1,5 +1,5 @@
-#ifndef _DRAWABLE_HPP_
-#define _DRAWABLE_HPP_
+#ifndef _ASTEROIDS_DRAWABLE_HPP_
+#define _ASTEROIDS_DRAWABLE_HPP_
 
 #include "../include/glad/glad.h"
 #include "../include/shader_program.hpp"

@@ -1,5 +1,5 @@
-#ifndef _SHADER_PROGRAM_HPP_
-#define _SHADER_PROGRAM_HPP_
+#ifndef _ASTEROIDS_SHADER_PROGRAM_HPP_
+#define _ASTEROIDS_SHADER_PROGRAM_HPP_
 
 #include "../include/glad/glad.h"
   
