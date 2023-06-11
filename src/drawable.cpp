@@ -3,11 +3,11 @@
 
 Drawable::Drawable(const std::vector<float>& verts, const std::vector<GLuint>& elts/*, const glm::vec4& col = glm::vec4({1.0f, 1.0f, 1.0f, 1.0f})*/): vertices{verts}, elements{elts}/*, lineColour{col}*/
 {
-    setUpBuffers();
+    //setUpBuffers();
 }
 
 Drawable::~Drawable(){
-    releaseBuffers();
+    //releaseBuffers();
 }
 
 void Drawable::setUpBuffers(){
@@ -50,11 +50,11 @@ GLuint const *Drawable::getElements() const{
 }
 
 void Drawable::draw(){
-    std::cout << "Binding\n";
+    //std::cout << "Binding\n";
     glBindVertexArray(VAO);
-    std::cout << "Drawing ("<<drawingMode<<","<<elements.size()<<")\n";
+    //std::cout << "Drawing ("<<drawingMode<<","<<elements.size()<<")\n";
     glDrawElementsInstanced(drawingMode, elements.size(), GL_UNSIGNED_INT, 0, 9);
-    std::cout << "Unbinding\n";
+    //std::cout << "Unbinding\n";
     glBindVertexArray(0);
 }
 

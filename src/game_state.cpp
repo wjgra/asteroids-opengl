@@ -9,10 +9,13 @@ GameState::GameState(unsigned int width, unsigned int height) :
     ship(shipScale, winWidth/2.0f, winHeight/2.0f),
     wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag")    
 {
+
+    ship.setUpBuffers();
+
     // Create asteroids
-    unsigned int const numAsteroids = 4;
+    unsigned int const numAsteroids = 25;
     for (unsigned int i = 0; i < numAsteroids ; ++i){
-        std::cout << "Creating asteroid " << i <<" (" <<8+(i%10)<<")\n";
+        //std::cout << "Creating asteroid " << i <<" (" <<8+(i%10)<<")\n";
         float temp = (float)i/(float)numAsteroids;
         asteroids.emplace_back(shipScale*2.0f*(0.5f+temp), 
             winWidth*temp, 
@@ -20,6 +23,11 @@ GameState::GameState(unsigned int width, unsigned int height) :
             2*piValue*temp, 
             8+(i%10));
     }
+
+    for (Asteroid& ast : asteroids)
+    {  
+            ast.setUpBuffers();
+    } 
 
     // Activate shader to initialise uniforms
     wrapShader.useProgram();
@@ -64,5 +72,9 @@ GameState::GameState(unsigned int width, unsigned int height) :
 }
 
 GameState::~GameState(){
-
+    ship.releaseBuffers();
+    for (Asteroid& ast : asteroids)
+        {
+            ast.releaseBuffers();
+        }
 }

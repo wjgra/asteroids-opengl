@@ -108,13 +108,13 @@ void AppState::frame(unsigned int frameTime){ // Move to app state frame()
             int count = 0;
             for (Asteroid& ast : gameState.asteroids)
             {
-                std::cout << "Drawing asteroid " <<count;count++;
+                //std::cout << "Drawing asteroid " <<count;count++;
                 trans = ast.getTransMatrix(frameTime);
-                std::cout <<".";
+                //std::cout <<".";
                 glUniformMatrix4fv(gameState.uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-                std::cout <<".";
+                //std::cout <<".";
                 ast.draw();
-                std::cout <<".\n";
+                //std::cout <<".\n";
             }    
 
             //glDrawElementsInstanced(GL_LINE_STRIP, 5, GL_UNSIGNED_INT, 0, 9);
