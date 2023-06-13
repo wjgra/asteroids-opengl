@@ -2,22 +2,18 @@
 
 static float const piValue = 3.1415926535897932385;
 
-Ship::Ship(float s, float pX, float pY): 
+Ship::Ship(float s, float pX, float pY, float dir): 
     GameObject({
         0.5f, 0.0f,  // front of ship
         -0.5f, 0.5f, // rear right
         -0.25f, 0.0f, // rear centre
         -0.5f, -0.5f // rear left
     }, 
-    {0,1,2,3,0}/*,
-    {0.5f, 0.6f, 1.0f, 1.0f}*/), 
-    scale(s), posX(pX), posY(pY){
+    {0,1,2,3,0}, s, pX, pY, dir){
     velocityX = 0.0f;
     velocityY = 0.0f;
-    orientation = 0.0f;
     isVisible = false;
     isThrusting = false;
-    //timeSinceLastUpdate = 0;
     timeSinceLastShot = minShootingInterval+1;
     isTurningLeft = false;
     isTurningRight = false;
@@ -77,59 +73,6 @@ void Ship::updateNextPos(){
         nextOrientation = orientation + 2.0f * piValue * rotationPerTimeStep;
     }
 }
-
-// Moves forward one timestep by copying nextPos->Pos etc. and checking for wrapping positions.
-void Ship::updatePositions(){
-    // 
-    posX = nextPosX;
-    posY = nextPosY;
-    velocityX = nextVelocityX;
-    velocityY = nextVelocityY;
-    orientation = nextOrientation;
-
-    updateNextPos();
-
-    // Wrap position when crossing edges of the screen
-    if (posX > 640 && nextPosX > 640){
-        posX -= 640;
-        nextPosX -= 640;
-    }
-    else if (posX < 0 && nextPosX < 0){
-        posX += 640;
-        nextPosX += 640;
-    }
-
-    if (posY > 480 && nextPosY > 480){
-        posY -= 480;
-        nextPosY -= 480;
-    }
-    else if (posY < 0 && nextPosY < 0){
-        posY += 480;
-        nextPosY += 480;
-    }
-
-}
-
-// Returns a transformation matrix by interpolating between the current 
-// and next position using the frame length.
-glm::mat4 Ship::getTransMatrix(){
-    // Linearly interpolate position and orientation
-    float tInterp = float(GameObject::timeSinceLastUpdate)/float(GameObject::timeStep);
-    
-    glm::vec3 shipPos = glm::vec3(posX*(1-tInterp)+nextPosX*tInterp,
-        posY*(1-tInterp)+nextPosY*tInterp,
-        0.0f);
-
-    float orient = (1-tInterp)*orientation+tInterp*nextOrientation;
-
-    // Create transformation matrix
-    glm::mat4 trans = glm::mat4(1.0f);
-    trans = glm::translate(trans, shipPos);
-    trans = glm::rotate(trans, orient, glm::vec3(0.0f, 0.0f, 1.0f));
-    trans = glm::scale(trans, glm::vec3(scale, scale, scale));
-
-    return trans;
-};
 
 bool Ship::destroyThisFrame(){
     return false;
