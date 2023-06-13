@@ -27,6 +27,9 @@ public:
     std::vector<std::unique_ptr<Asteroid>> asteroids;
     // Shaders
     ShaderProgram wrapShader;
+private:
+    void checkCollision(const Asteroid& ast, const Missile& mis);
+    int timeSinceLastCollCheck = 0; //consider unifying step forward across draw/coll check (better than passing pointers?)
 };
 
 #endif

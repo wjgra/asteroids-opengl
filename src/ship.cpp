@@ -3,7 +3,7 @@
 static float const piValue = 3.1415926535897932385;
 
 Ship::Ship(float s, float pX, float pY): 
-    Drawable({
+    GameObject({
         0.5f, 0.0f,  // front of ship
         -0.5f, 0.5f, // rear right
         -0.25f, 0.0f, // rear centre
@@ -17,7 +17,7 @@ Ship::Ship(float s, float pX, float pY):
     orientation = 0.0f;
     isVisible = false;
     isThrusting = false;
-    timeSinceLastUpdate = 0;
+    //timeSinceLastUpdate = 0;
     timeSinceLastShot = minShootingInterval+1;
     isTurningLeft = false;
     isTurningRight = false;
@@ -28,7 +28,12 @@ Ship::Ship(float s, float pX, float pY):
 Ship::~Ship(){
 }
 
-// Updates the orientation and nextPos/nextVelocity variables by stepping forwards one timeStep.
+void Ship::beginFrame(unsigned int frameTime){
+    timeSinceLastShot += frameTime;
+}
+
+
+// Updates the nextOrientation and nextPos/nextVelocity variables for the given timestep.
 // Simulation is modelled as:
 //      d^2x/dt^2 = thrust - drag * unit_vector(x), 
 // where x and thrust are in R^2; drag > 0.
@@ -73,28 +78,16 @@ void Ship::updateNextPos(){
     }
 }
 
-// Returns a transformation matrix by interpolating between the current 
-// and next position using the frame length.
-glm::mat4 Ship::getTransMatrix(unsigned int frameTime){ // To do: consider separating update code from trans matric code
-    // Update positions/velocities if timeStep passed since last update
-    // int count = 0;
-    timeSinceLastUpdate += frameTime;
-    timeSinceLastShot += frameTime;
-    while (timeSinceLastUpdate >= timeStep){
-        posX = nextPosX;
-        posY = nextPosY;
-        velocityX = nextVelocityX;
-        velocityY = nextVelocityY;
-        orientation = nextOrientation;
-        updateNextPos();
-        updateMissiles();
-        timeSinceLastUpdate -= timeStep;
-        // count++;
-    }
-    
-    /*// Alert if more than two updates performed per frame    
-    if (count>2)
-        std::cout << "New matrix ("<<count<<")\n";*/
+// Moves forward one timestep by copying nextPos->Pos etc. and checking for wrapping positions.
+void Ship::updatePositions(){
+    // 
+    posX = nextPosX;
+    posY = nextPosY;
+    velocityX = nextVelocityX;
+    velocityY = nextVelocityY;
+    orientation = nextOrientation;
+
+    updateNextPos();
 
     // Wrap position when crossing edges of the screen
     if (posX > 640 && nextPosX > 640){
@@ -115,11 +108,14 @@ glm::mat4 Ship::getTransMatrix(unsigned int frameTime){ // To do: consider separ
         nextPosY += 480;
     }
 
-    // **** possible split ****
+}
 
+// Returns a transformation matrix by interpolating between the current 
+// and next position using the frame length.
+glm::mat4 Ship::getTransMatrix(){
     // Linearly interpolate position and orientation
-    float tInterp = float(timeSinceLastUpdate)/float(timeStep);
-
+    float tInterp = float(GameObject::timeSinceLastUpdate)/float(GameObject::timeStep);
+    
     glm::vec3 shipPos = glm::vec3(posX*(1-tInterp)+nextPosX*tInterp,
         posY*(1-tInterp)+nextPosY*tInterp,
         0.0f);
@@ -134,6 +130,10 @@ glm::mat4 Ship::getTransMatrix(unsigned int frameTime){ // To do: consider separ
 
     return trans;
 };
+
+bool Ship::destroyThisFrame(){
+    return false;
+}
 
 void Ship::turnLeft(bool turn){
     isTurningLeft = turn;

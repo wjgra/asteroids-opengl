@@ -8,6 +8,7 @@ GameState::GameState(unsigned int width, unsigned int height) :
     shipScale{float(winWidth)/40.0f},
     wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag")    
 {
+    GameObject::timeSinceLastUpdate = 0;
     ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f);
 
     // Create asteroids (temporary random selection)
@@ -71,7 +72,8 @@ void GameState::frame(unsigned int frameTime){
     // Prepare to render
     wrapShader.useProgram();
 
-    // Update ship transformation matrix
+    glm::mat4 trans;
+    /*// Update ship transformation matrix
     glm::mat4 trans = ship->getTransMatrix(frameTime);
     glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
 
@@ -79,7 +81,25 @@ void GameState::frame(unsigned int frameTime){
     glUniform4f(uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
 
     // Draw ship
+    ship->draw();*/
+    GameObject::timeSinceLastUpdate += frameTime;
+    ship->beginFrame(frameTime);
+
+    while(GameObject::timeSinceLastUpdate >= GameObject::timeStep){
+        ship->updatePositions();
+        ship->updateMissiles();
+        GameObject::timeSinceLastUpdate -= GameObject::timeStep;
+    }
+
+    trans = ship->getTransMatrix();
+    glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+
+    // Set draw colour
+    glUniform4f(uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
+
+    // Draw ship
     ship->draw();
+
 
     // Draw missiles
     glUniform4f(uniformColour, 0.3f, 0.4f, 1.0f, 1.0f);
@@ -99,16 +119,20 @@ void GameState::frame(unsigned int frameTime){
 
     // Set draw colour
     glUniform4f(uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
-    //int count = 0;
     for (auto&& ast : asteroids)
     {
-        //std::cout << "Drawing asteroid " <<count;count++;
         trans = ast->getTransMatrix(frameTime);
-        //std::cout <<".";
+
+        // Check collisions
+
+
         glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-        //std::cout <<".";
+
         ast->draw();
-        //std::cout <<".\n";
     }    
+
+}
+
+void GameState::checkCollision(const Asteroid& ast, const Missile& mis){
 
 }

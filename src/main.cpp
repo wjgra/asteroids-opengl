@@ -3,9 +3,6 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 #include <SDL_main.h>
-//#include <SDL_opengl.h>
-//#include <GL/gl.h>
-//#include <GL/glu.h>
 
 #include <iostream>
 #include <chrono>
@@ -14,7 +11,7 @@
 
 static float const piValue = 3.1415926535897932385;
 
-int main(int argc, char* argv[]){
+int main(){
 
     try{
         // Initialise window, openGL context and game state

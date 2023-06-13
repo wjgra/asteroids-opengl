@@ -27,7 +27,7 @@ public:
     unsigned int shotDuration, timeUntilDestroyed;
     float missileSpeed = 6.0f/10000.0f;
     unsigned int timeStep = 15000; // in microseconds
-    unsigned int lifetime = 50 * timeStep;
+    unsigned int lifetime = 65 * timeStep;
     bool toBeDestroyed;
 };
 
