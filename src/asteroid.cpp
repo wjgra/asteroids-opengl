@@ -14,9 +14,11 @@ Asteroid::~Asteroid(){
 }
 
 void Asteroid::beginFrame(unsigned int frameTime){
-    //timeSinceLastUpdate += frameTime;  
 }
 
+bool Asteroid::destroyThisFrame(){
+    return false;
+}
 
 // Updates the orientation and nextPos/nextVelocity variables by stepping forwards one timeStep.
 void Asteroid::updateNextPos(){
@@ -30,10 +32,6 @@ void Asteroid::updateNextPos(){
     // Update orientation 
     nextOrientation = orientation - 2.0f * piValue * rotPerTimeStep;
     
-}
-
-bool Asteroid::destroyThisFrame(){
-    return false;
 }
 
 std::vector<float> const Asteroid::genVerts(unsigned int segments){

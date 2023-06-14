@@ -9,6 +9,8 @@
 #include "../include/ship.hpp"
 #include "../include/asteroid.hpp"
 
+#include <glm/gtc/type_ptr.hpp>
+
 class GameState{
 public:
     GameState(unsigned int width, unsigned int height);

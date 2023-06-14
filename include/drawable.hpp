@@ -4,12 +4,8 @@
 #include "../include/glad/glad.h"
 #include "../include/shader_program.hpp"
 
-//#include <SDL.h>
-//#include <SDL_opengl.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
-
-//#include <glm/glm.hpp>
 
 #include <vector>
 

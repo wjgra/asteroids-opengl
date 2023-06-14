@@ -60,9 +60,6 @@ GameState::GameState(unsigned int width, unsigned int height) :
 
     // Get location of colour uniform
     uniformColour = wrapShader.getUniformLocation("inputColour"); 
-
-    
-
 }
 
 GameState::~GameState(){
@@ -76,8 +73,11 @@ void GameState::frame(unsigned int frameTime){
 
     GameObject::timeSinceLastUpdate += frameTime;
     ship->beginFrame(frameTime);
-    for (auto&& ast : asteroids){
+    /*for (auto&& ast : asteroids){
         ast->beginFrame(frameTime); // no-op currently
+    }*/
+    for (auto&& mis : ship->missiles){
+        mis->beginFrame(frameTime);
     }
 
     while(GameObject::timeSinceLastUpdate >= GameObject::timeStep){
@@ -87,21 +87,24 @@ void GameState::frame(unsigned int frameTime){
             ast->updatePositions();
         }
         // To do: modify missiles to conform with GameObject class
+        for (auto&& mis : ship->missiles){
+            mis->updatePositions();
+        }
         // To do: check collisions
         GameObject::timeSinceLastUpdate -= GameObject::timeStep;
     }
 
     // Draw missiles
     glUniform4f(uniformColour, 0.3f, 0.4f, 1.0f, 1.0f);
-    for (auto mis = ship->missiles.begin(); mis < ship->missiles.end(); /*no increment due to potential erasing*/){
-        trans = (*mis)->getTransMatrix(frameTime);
-        if ((*mis)->destroyThisFrame()){
-            mis = ship->missiles.erase(mis);
+    for (auto&& it = ship->missiles.begin(); it < ship->missiles.end(); /*no increment due to potential erasing*/){
+       if ((*it)->destroyThisFrame()){
+            it = ship->missiles.erase(it);
         }
         else{
+            trans = (*it)->getTransMatrix();
             glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-            (*mis)->draw();
-            ++mis;
+            (*it)->draw();
+            ++it;
         }
     }
 

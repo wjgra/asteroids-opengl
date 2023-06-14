@@ -4,7 +4,7 @@ int GameObject::timeSinceLastUpdate = 0;
 
 GameObject::GameObject(const std::vector<float>& verts, const std::vector<GLuint>& elts, float s, float pX, float pY, float dir) : 
     Drawable(verts, elts),
-    scale{s}, posX{pX}, posY{pY}, orientation{dir}
+    scale{s}, posX{pX}, posY{pY}, orientation{dir}, toBeDestroyed{false}
 {};
 
 

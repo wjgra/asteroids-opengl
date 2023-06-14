@@ -6,8 +6,9 @@ Window::Window(unsigned int width, unsigned int height) : winWidth{width}, winHe
         throw "Failed to initialise SDL";
     }
 
-    // Can I move this to context class?
+    
     SDL_GL_LoadLibrary(nullptr); 
+    // Set OpenGL attributes - must be done before window creation!
     // Request an OpenGL 3.3 context
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -15,7 +16,9 @@ Window::Window(unsigned int width, unsigned int height) : winWidth{width}, winHe
     // Request a depth buffer
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    // End "can I move this?"
+    // Request multisampling
+    // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    // SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
     // Create window
     window = SDL_CreateWindow(

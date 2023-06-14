@@ -5,15 +5,8 @@
 #include "../include/game_object.hpp"
 #include "../include/missile.hpp"
 
-#include <chrono>
-#include <iostream>
 #include <vector>
 #include <memory>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 class Ship : public GameObject {
 public:

@@ -4,13 +4,6 @@
 #include "../include/glad/glad.h"
 #include "../include/game_object.hpp"
 
-#include <chrono>
-#include <iostream>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 class Asteroid : public GameObject {
 public:
     Asteroid(float s, float pX, float pY, float dir, unsigned int segs);

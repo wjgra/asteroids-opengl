@@ -19,6 +19,9 @@ Context::Context(SDL_Window* window, unsigned int width, unsigned int height) : 
     // Set v-sync
     SDL_GL_SetSwapInterval(useVsync);
 
+    // Enable multisampling
+    // glEnable(GL_MULTISAMPLE);
+
     // Set viewport size
     glViewport(0, 0, viewportWidth, viewportHeight);
 }

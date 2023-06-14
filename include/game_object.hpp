@@ -5,7 +5,6 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-//#include <glm/gtc/type_ptr.hpp>
 
 // Abstract class for simulated game objects to inherit from
 class GameObject : public Drawable{
@@ -21,6 +20,7 @@ public:
 protected:
     float scale, posX, posY, velocityX, velocityY, orientation, nextOrientation, 
         nextPosX, nextPosY, nextVelocityX, nextVelocityY;
+    bool toBeDestroyed;
 };
 
 #endif
