@@ -7,6 +7,9 @@ GameObject::GameObject(const std::vector<float>& verts, const std::vector<GLuint
     scale{s}, posX{pX}, posY{pY}, orientation{dir}, toBeDestroyed{false}
 {};
 
+bool GameObject::toDestroyThisFrame(){
+    return toBeDestroyed;
+}
 
 // Moves forward one timestep by copying nextPos->Pos etc. and checking for wrapping positions.
 void GameObject::updatePositions(){
@@ -57,3 +60,7 @@ glm::mat4 GameObject::getTransMatrix(){
 
     return trans;
 };
+
+void GameObject::destroy(){
+    toBeDestroyed = true;
+}

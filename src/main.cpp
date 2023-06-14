@@ -12,7 +12,6 @@
 static float const piValue = 3.1415926535897932385;
 
 int main(){
-
     try{
         // Initialise window, openGL context and game state
         AppState appState(2);

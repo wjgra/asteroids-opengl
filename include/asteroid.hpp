@@ -11,7 +11,6 @@ public:
     // Simulation functions
     // -- Called every frame
     virtual void beginFrame(unsigned int frameTime) override;
-    virtual bool destroyThisFrame() override;
     // -- Called every simulation timestep
     virtual void updateNextPos() override;
     // Utility functions
@@ -24,7 +23,7 @@ public:
     //unsigned const segments;
     float maxRadius; // temp!
 private:
-    //unsigned int size = 1;
+    unsigned int size = 1;
     std::vector<float> const genVerts(unsigned int segments);
     std::vector<GLuint> const genElts(unsigned int segments);
 };

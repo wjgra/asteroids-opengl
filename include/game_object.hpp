@@ -9,12 +9,14 @@
 // Abstract class for simulated game objects to inherit from
 class GameObject : public Drawable{
 public:
+    friend class GameState;
     GameObject(const std::vector<float>& verts, const std::vector<GLuint>& elts, float s, float pX, float pY, float dir);
     virtual void beginFrame(unsigned int frameTime) = 0;
     virtual void updateNextPos() = 0;
     void updatePositions();
-    virtual bool destroyThisFrame() = 0;
+    bool toDestroyThisFrame();
     glm::mat4 getTransMatrix();
+    virtual void destroy();
     int static const timeStep = 15000; // in microseconds
     int static timeSinceLastUpdate;
 protected:

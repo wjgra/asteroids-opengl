@@ -24,13 +24,6 @@ void Missile::beginFrame(unsigned int frameTime){
     if (frameTime >= timeUntilDestroyed){
         toBeDestroyed = true;
     }
-    else{
-        timeUntilDestroyed -= frameTime;
-    }
-}
-
-bool Missile::destroyThisFrame(){
-    return toBeDestroyed;
 }
 
 // Updates the orientation and nextPos/nextVelocity variables by stepping forwards one timeStep.
@@ -42,4 +35,6 @@ void Missile::updateNextPos(){
     nextVelocityY = velocityY;
 
     nextOrientation = orientation;
+
+    timeUntilDestroyed -= timeStep;
 }

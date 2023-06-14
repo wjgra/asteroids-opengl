@@ -74,10 +74,6 @@ void Ship::updateNextPos(){
     }
 }
 
-bool Ship::destroyThisFrame(){
-    return false;
-}
-
 void Ship::turnLeft(bool turn){
     isTurningLeft = turn;
 }

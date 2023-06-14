@@ -6,6 +6,8 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 
+#include <cmath>
+
 #include "../include/ship.hpp"
 #include "../include/asteroid.hpp"
 
@@ -30,7 +32,7 @@ public:
     // Shaders
     ShaderProgram wrapShader;
 private:
-    void checkCollision(const Asteroid& ast, const Missile& mis);
+    bool checkCollisionCoarse(const Asteroid& ast, const Missile& mis);
     int timeSinceLastCollCheck = 0; //consider unifying step forward across draw/coll check (better than passing pointers?)
 };
 

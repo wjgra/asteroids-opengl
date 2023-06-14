@@ -15,7 +15,6 @@ public:
     // Simulation functions
     // -- Called every frame
     virtual void beginFrame(unsigned int frameTime) override;
-    virtual bool destroyThisFrame() override;
     // -- Called every simulation timestep
     virtual void updateNextPos() override;
     void updateMissiles();

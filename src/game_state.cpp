@@ -86,18 +86,26 @@ void GameState::frame(unsigned int frameTime){
         for (auto&& ast : asteroids){
             ast->updatePositions();
         }
-        // To do: modify missiles to conform with GameObject class
         for (auto&& mis : ship->missiles){
             mis->updatePositions();
         }
-        // To do: check collisions
+        // Check collisions
+        for (auto&& mis : ship->missiles){
+            for (auto&& ast : asteroids){
+                if (checkCollisionCoarse(*ast,*mis)){
+                    // To do: fine collision detection
+                    mis->destroy();
+                    ast->destroy();
+                }
+            }
+        }
         GameObject::timeSinceLastUpdate -= GameObject::timeStep;
     }
 
     // Draw missiles
     glUniform4f(uniformColour, 0.3f, 0.4f, 1.0f, 1.0f);
     for (auto&& it = ship->missiles.begin(); it < ship->missiles.end(); /*no increment due to potential erasing*/){
-       if ((*it)->destroyThisFrame()){
+       if ((*it)->toDestroyThisFrame()){
             it = ship->missiles.erase(it);
         }
         else{
@@ -110,12 +118,25 @@ void GameState::frame(unsigned int frameTime){
 
     // Draw asteroids
     glUniform4f(uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
-    for (auto&& ast : asteroids)
+    /*for (auto&& ast : asteroids)
     {
         trans = ast->getTransMatrix();
         glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
         ast->draw();
-    }    
+    }    */
+
+    for (auto&& it = asteroids.begin(); it < asteroids.end(); /*no increment due to potential erasing*/){
+       if ((*it)->toDestroyThisFrame()){
+            it = asteroids.erase(it);
+        }
+        else{
+            trans = (*it)->getTransMatrix();
+            glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+            (*it)->draw();
+            ++it;
+        }
+    }
+    
 
     // Draw ship (always on top)
     trans = ship->getTransMatrix();
@@ -125,6 +146,7 @@ void GameState::frame(unsigned int frameTime){
 
 }
 
-void GameState::checkCollision(const Asteroid& ast, const Missile& mis){
-
+bool GameState::checkCollisionCoarse(const Asteroid& ast, const Missile& mis){
+    
+    return (std::abs(mis.posX-ast.posX) <= ast.maxRadius) && (std::abs(mis.posY-ast.posY) <= ast.maxRadius);
 }

@@ -16,10 +16,6 @@ Asteroid::~Asteroid(){
 void Asteroid::beginFrame(unsigned int frameTime){
 }
 
-bool Asteroid::destroyThisFrame(){
-    return false;
-}
-
 // Updates the orientation and nextPos/nextVelocity variables by stepping forwards one timeStep.
 void Asteroid::updateNextPos(){
     // Calculate pos
