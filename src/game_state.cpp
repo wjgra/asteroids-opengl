@@ -12,14 +12,14 @@ GameState::GameState(unsigned int width, unsigned int height) :
     ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f, 0.0f);
 
     // Create asteroids (temporary random selection)
-    unsigned int const numAsteroids = 6;
+    unsigned int const numAsteroids = 12;
     for (unsigned int i = 0; i < numAsteroids ; ++i){
         float temp = (float)i/(float)numAsteroids;
-        std::unique_ptr<Asteroid> tempAst = std::make_unique<Asteroid>(shipScale*2.0f*(0.5f+temp), 
+        std::unique_ptr<Asteroid> tempAst = std::make_unique<Asteroid>(shipScale, 
             winWidth*temp, 
             winHeight*temp, 
             2*piValue*temp, 
-            8+(i%10));
+            i%4);
         asteroids.push_back(std::move(tempAst));
     }
 
@@ -96,6 +96,16 @@ void GameState::frame(unsigned int frameTime){
                     // To do: fine collision detection
                     mis->destroy();
                     ast->destroy();
+                    if (ast->size != 0)
+                    {
+                        float deflection = piValue/10.0f;
+                        float dirAst = atan2(ast->velocityY, ast->velocityX);
+                        std::unique_ptr<Asteroid> newAst1 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst+deflection,ast->size-1);
+                        std::unique_ptr<Asteroid> newAst2 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst-deflection,ast->size-1);
+                        asteroids.push_back(std::move(newAst1));
+                        asteroids.push_back(std::move(newAst2));
+                    }
+                    break;
                 }
             }
         }

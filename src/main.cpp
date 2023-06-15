@@ -54,4 +54,3 @@ int main(){
 
 // To do:
 // - Rule of 3 for new classes
-// - Move setupbuffers/releasebuffers to constructor/destructor
