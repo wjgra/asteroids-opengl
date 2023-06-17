@@ -92,7 +92,7 @@ void GameState::frame(unsigned int frameTime){
         // Check collisions
         for (auto&& mis : ship->missiles){
             for (auto&& ast : asteroids){
-                if (checkCollisionCoarse(*ast,*mis)){
+                if (!(mis->toDestroyThisFrame()) && !ast->toDestroyThisFrame() && checkCollisionCoarse(*ast,*mis)){
                     // To do: fine collision detection
                     mis->destroy();
                     ast->destroy();
@@ -147,7 +147,6 @@ void GameState::frame(unsigned int frameTime){
         }
     }
     
-
     // Draw ship (always on top)
     trans = ship->getTransMatrix();
     glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
@@ -157,6 +156,5 @@ void GameState::frame(unsigned int frameTime){
 }
 
 bool GameState::checkCollisionCoarse(const Asteroid& ast, const Missile& mis){
-    
     return (std::abs(mis.posX-ast.posX) <= ast.maxRadius) && (std::abs(mis.posY-ast.posY) <= ast.maxRadius);
 }
