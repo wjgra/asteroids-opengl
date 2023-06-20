@@ -24,7 +24,6 @@ void Drawable::setUpBuffers(){
     glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(float), vertices.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    
 
     // Bind EBO and copy element data into EBO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -50,11 +49,9 @@ GLuint const *Drawable::getElements() const{
 }
 
 void Drawable::draw(){
-    //std::cout << "Binding\n";
+
     glBindVertexArray(VAO);
-    //std::cout << "Drawing ("<<drawingMode<<","<<elements.size()<<")\n";
     glDrawElementsInstanced(drawingMode, elements.size(), GL_UNSIGNED_INT, 0, 9);
-    //std::cout << "Unbinding\n";
     glBindVertexArray(0);
 }
 

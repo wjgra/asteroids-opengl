@@ -16,45 +16,10 @@ void AppState::handleEvents(SDL_Event const&  event){
         case SDL_QUIT:
             quit = true;
             break;
-        //case SDL_WINDOWEVENT: // To do: handle window resize events
-            //break;
         case SDL_KEYDOWN:
             switch(event.key.keysym.scancode){
-                case SDL_SCANCODE_ESCAPE:
-                    quit = true;
-                    break;
                 case SDL_SCANCODE_F11:
                     window.toggleFullScreen();
-                    break;
-                case SDL_SCANCODE_LEFT:
-                    gameState.ship->turnLeft(true);
-                    break;
-                case SDL_SCANCODE_RIGHT:
-                    gameState.ship->turnRight(true);
-                    break;
-                case SDL_SCANCODE_UP:
-                    gameState.ship->thrustForward(true);
-                    break;
-                case SDL_SCANCODE_DOWN:
-                    gameState.ship->shootMissile(true);
-                    break;
-                default:
-                    break;
-            }
-            break;
-        case SDL_KEYUP:
-            switch(event.key.keysym.scancode){
-                case SDL_SCANCODE_LEFT:
-                    gameState.ship->turnLeft(false);
-                    break;
-                case SDL_SCANCODE_RIGHT:
-                    gameState.ship->turnRight(false);
-                    break;
-                case SDL_SCANCODE_UP:
-                    gameState.ship->thrustForward(false);
-                    break;
-                case SDL_SCANCODE_DOWN:
-                    gameState.ship->shootMissile(false);
                     break;
                 default:
                     break;
@@ -62,6 +27,22 @@ void AppState::handleEvents(SDL_Event const&  event){
             break;
         default:
             break;
+    }
+    switch (gameState.screen){
+        case GameState::Screen::play:
+            gameState.handleEventsPlay(event);
+        break;
+        case GameState::Screen::pause:
+            gameState.handleEventsPause(event);
+        break;
+        case GameState::Screen::menu:
+            gameState.handleEventsMenu(event);
+        break;
+        case GameState::Screen::score:
+            gameState.handleEventsScore(event);
+        break;
+        default:
+        break;
     }
 }
 
@@ -78,4 +59,8 @@ void AppState::frame(unsigned int frameTime){ // Move to app state frame()
 
     // Update FPS counter
     window.frame(frameTime);
+
+    if (gameState.screen == GameState::Screen::quit){
+        quit = true;
+    }
 }

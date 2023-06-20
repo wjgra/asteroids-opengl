@@ -30,7 +30,5 @@ public:
     Window window;
     Context context;
     GameState gameState;
-
-
 };
 #endif

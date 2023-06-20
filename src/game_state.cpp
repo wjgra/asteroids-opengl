@@ -8,6 +8,7 @@ GameState::GameState(unsigned int width, unsigned int height) :
     shipScale{float(winWidth)/40.0f},
     wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag")    
 {
+    screen = Screen::play;
     GameObject::timeSinceLastUpdate = 0;
     ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f, 0.0f);
 
@@ -66,6 +67,101 @@ GameState::~GameState(){
 }
 
 void GameState::frame(unsigned int frameTime){
+    switch (screen){
+        case GameState::Screen::play:
+            framePlay(frameTime);
+        break;
+        case GameState::Screen::pause:
+            framePause(frameTime);
+        break;
+        case GameState::Screen::menu:
+            frameMenu(frameTime);
+        break;
+        case GameState::Screen::score:
+            frameScore(frameTime);
+        break;
+        default:
+        break;
+    }
+    // temp!!!
+    textRen.draw();
+}
+
+bool GameState::checkCollisionCoarse(const Asteroid& ast, const Missile& mis){
+    return (std::abs(mis.posX-ast.posX) <= ast.maxRadius) && (std::abs(mis.posY-ast.posY) <= ast.maxRadius);
+}
+
+void GameState::handleEventsPlay(SDL_Event const& event){
+    switch(event.type){
+        case SDL_KEYDOWN:
+            switch(event.key.keysym.scancode){
+                case SDL_SCANCODE_ESCAPE:
+                    screen = Screen::pause;
+                    break;
+                case SDL_SCANCODE_LEFT:
+                    ship->turnLeft(true);
+                    break;
+                case SDL_SCANCODE_RIGHT:
+                    ship->turnRight(true);
+                    break;
+                case SDL_SCANCODE_UP:
+                    ship->thrustForward(true);
+                    break;
+                case SDL_SCANCODE_DOWN:
+                    ship->shootMissile(true);
+                    break;
+                default:
+                    break;
+            }
+            break;
+        case SDL_KEYUP:
+            switch(event.key.keysym.scancode){
+                case SDL_SCANCODE_LEFT:
+                    ship->turnLeft(false);
+                    break;
+                case SDL_SCANCODE_RIGHT:
+                    ship->turnRight(false);
+                    break;
+                case SDL_SCANCODE_UP:
+                    ship->thrustForward(false);
+                    break;
+                case SDL_SCANCODE_DOWN:
+                    ship->shootMissile(false);
+                    break;
+                default:
+                    break;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void GameState::handleEventsPause(SDL_Event const& event){
+    switch(event.type){
+        case SDL_KEYDOWN:
+            switch(event.key.keysym.scancode){
+                case SDL_SCANCODE_TAB:
+                    screen = Screen::quit;
+                    break;
+                case SDL_SCANCODE_RETURN:
+                    screen = Screen::play;
+                    break;
+                default:
+                    break;
+            }
+    }
+}
+
+void GameState::handleEventsMenu(SDL_Event const& event){
+
+}
+
+void GameState::handleEventsScore(SDL_Event const& event){
+
+}
+
+void GameState::framePlay(unsigned int frameTime){
     // Prepare to render
     wrapShader.useProgram();
 
@@ -128,13 +224,47 @@ void GameState::frame(unsigned int frameTime){
 
     // Draw asteroids
     glUniform4f(uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
-    /*for (auto&& ast : asteroids)
-    {
-        trans = ast->getTransMatrix();
-        glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-        ast->draw();
-    }    */
+    for (auto&& it = asteroids.begin(); it < asteroids.end(); /*no increment due to potential erasing*/){
+       if ((*it)->toDestroyThisFrame()){
+            it = asteroids.erase(it);
+        }
+        else{
+            trans = (*it)->getTransMatrix();
+            glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+            (*it)->draw();
+            ++it;
+        }
+    }
+    
+    // Draw ship (always on top)
+    trans = ship->getTransMatrix();
+    glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+    glUniform4f(uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
+    ship->draw();
+}
 
+void GameState::framePause(unsigned int frameTime){
+    // Prepare to render
+    wrapShader.useProgram();
+
+    glm::mat4 trans;
+
+    // Draw missiles
+    glUniform4f(uniformColour, 0.3f, 0.4f, 1.0f, 1.0f);
+    for (auto&& it = ship->missiles.begin(); it < ship->missiles.end(); /*no increment due to potential erasing*/){
+       if ((*it)->toDestroyThisFrame()){
+            it = ship->missiles.erase(it);
+        }
+        else{
+            trans = (*it)->getTransMatrix();
+            glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+            (*it)->draw();
+            ++it;
+        }
+    }
+
+    // Draw asteroids
+    glUniform4f(uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
     for (auto&& it = asteroids.begin(); it < asteroids.end(); /*no increment due to potential erasing*/){
        if ((*it)->toDestroyThisFrame()){
             it = asteroids.erase(it);
@@ -153,8 +283,13 @@ void GameState::frame(unsigned int frameTime){
     glUniform4f(uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
     ship->draw();
 
+    // To do: draw pause menu
 }
 
-bool GameState::checkCollisionCoarse(const Asteroid& ast, const Missile& mis){
-    return (std::abs(mis.posX-ast.posX) <= ast.maxRadius) && (std::abs(mis.posY-ast.posY) <= ast.maxRadius);
+void GameState::frameMenu(unsigned int frameTime){
+
+}
+
+void GameState::frameScore(unsigned int frameTime){
+
 }
