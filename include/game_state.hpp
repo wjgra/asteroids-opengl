@@ -7,6 +7,7 @@
 #include <SDL_opengl.h>
 
 #include <cmath>
+#include <time.h>
 
 #include "../include/ship.hpp"
 #include "../include/asteroid.hpp"
@@ -33,7 +34,7 @@ private:
     void drawShip();
     void drawMissiles();
     void drawAsteroids();
-    void newGame(); // reset all game params - add args for custom set up
+    void newGame(std::vector<unsigned int> astLayout); // reset all game params - add args for custom set up
 public:
     // Dimensions of notional window
     unsigned int const winWidth = 640;

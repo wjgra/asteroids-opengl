@@ -9,33 +9,7 @@ GameState::GameState(unsigned int width, unsigned int height) :
     wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag")    
 {
     screen = Screen::menu;
-
-    // code below same as newGame - to combine
-    GameObject::timeSinceLastUpdate = 0;
-    ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f, 0.0f);
-    asteroids.clear();
-    // Create asteroids (temporary random selection)
-    unsigned int const numAsteroids = 12;
-    for (unsigned int i = 0; i < numAsteroids ; ++i){
-        float temp = (float)i/(float)numAsteroids;
-        std::unique_ptr<Asteroid> tempAst = std::make_unique<Asteroid>(shipScale, 
-            winWidth*temp, 
-            winHeight*temp, 
-            2*piValue*temp, 
-            3-(i%4));
-        asteroids.push_back(std::move(tempAst));
-    }
-
-    // temp - move asteroids on menu a bit before displaying
-    GameObject::timeSinceLastUpdate = 10000000;
-    while(GameObject::timeSinceLastUpdate >= GameObject::timeStep){
-        for (auto&& ast : asteroids){
-            ast->updatePositions();
-        }
-        GameObject::timeSinceLastUpdate -= GameObject::timeStep;
-    }
-    GameObject::timeSinceLastUpdate = 0;
-    // end temp
+    newGame({10,5,6,1});
 
     // Activate shader to initialise uniforms
     wrapShader.useProgram();
@@ -177,8 +151,8 @@ void GameState::handleEventsMenu(SDL_Event const& event){
         case SDL_KEYDOWN:
             switch(event.key.keysym.scancode){
                 case SDL_SCANCODE_RETURN:
-                    newGame();
-                    // screen = Screen::play;
+                    newGame({2,5,6,1});
+                    screen = Screen::play;
                     break;
                 case SDL_SCANCODE_TAB:
                     screen = Screen::quit;
@@ -237,8 +211,10 @@ void GameState::framePlay(unsigned int frameTime){
                     {
                         float deflection = piValue/10.0f;
                         float dirAst = atan2(ast->velocityY, ast->velocityX);
-                        std::unique_ptr<Asteroid> newAst1 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst+deflection,ast->size-1);
-                        std::unique_ptr<Asteroid> newAst2 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst-deflection,ast->size-1);
+                        int rotSpeedModifier = (rand() % 5) - 2;
+                        if (!rotSpeedModifier) ++rotSpeedModifier;
+                        std::unique_ptr<Asteroid> newAst1 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst+deflection,ast->size-1, rotSpeedModifier);
+                        std::unique_ptr<Asteroid> newAst2 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst-deflection,ast->size-1, rotSpeedModifier);
                         asteroids.push_back(std::move(newAst1));
                         asteroids.push_back(std::move(newAst2));
                     }
@@ -284,9 +260,10 @@ void GameState::frameMenu(unsigned int frameTime){
     wrapShader.useProgram();
     drawAsteroids();
 
+    textRen.drawStringCentred("A HOMAGE TO ATARI'S", 16.0f, winWidth/2, winHeight/2-64.0f);
     textRen.drawStringCentred("ASTEROIDS", 64.0f, winWidth/2, winHeight/2-32.0f);
     textRen.drawStringCentred("[ENTER] PLAY GAME", 16.0f, winWidth/2, winHeight/2+64.0f);
-    textRen.drawStringCentred("[TAB] QUIT", 16.0f, winWidth/2, winHeight/2+96.0f);
+    textRen.drawStringCentred("[TAB] QUIT", 16.0f, winWidth/2, winHeight/2+96.0f); // Do not display in web version
 }
 
 void GameState::frameScore(unsigned int frameTime){
@@ -348,21 +325,23 @@ void GameState::drawAsteroids(){
     }
 }
 
-void GameState::newGame(){
+void GameState::newGame(std::vector<unsigned int> astLayout){
     score = 0;
-    screen = Screen::play;
     GameObject::timeSinceLastUpdate = 0;
     ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f, 0.0f);
+
     asteroids.clear();
-    // Create asteroids (temporary random selection)
-    unsigned int const numAsteroids = 12;
-    for (unsigned int i = 0; i < numAsteroids ; ++i){
-        float temp = (float)i/(float)numAsteroids;
-        std::unique_ptr<Asteroid> tempAst = std::make_unique<Asteroid>(shipScale, 
-            winWidth*temp, 
-            winHeight*temp, 
-            2*piValue*temp, 
-            i%4);
-        asteroids.push_back(std::move(tempAst));
+    srand(time(NULL));
+    
+    for (unsigned int size = 0 ; size < std::min((int)astLayout.size(), 4); ++size){
+        for (unsigned int i = 0 ; i < astLayout[size]; ++i){
+            float x = winWidth * (0.66f + (rand() % 20) / 30.0f);
+            float y = winHeight * (0.66f + (rand() % 20) / 30.0f);
+            float dir = 2 * piValue * (rand() % 60) / 60.0f;
+            int rotSpeedModifier = (rand() % 5) - 2;
+            if (!rotSpeedModifier) ++rotSpeedModifier;
+            std::unique_ptr<Asteroid> tempAst = std::make_unique<Asteroid>(shipScale, x, y, dir, size, rotSpeedModifier);
+            asteroids.push_back(std::move(tempAst));
+        }
     }
 }

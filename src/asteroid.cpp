@@ -2,11 +2,12 @@
 
 static float const piValue = 3.1415926535897932385;
 
-Asteroid::Asteroid(float s, float pX, float pY, float dir, unsigned int sz): 
+Asteroid::Asteroid(float s, float pX, float pY, float dir, unsigned int sz, int rSpeed): 
     GameObject(genVerts(sz), genElts(sz), s, pX, pY, dir),
     size{sz},
     segments{7+3*sz},
-    speed{(4-sz)/2} // temp
+    speed{(5-sz)/2},
+    rotPerTimeStep{0.005*rSpeed}
 {
     maxRadius = 1.25*s*(1u << sz)/2.0f;
     velocityX = speed*cos(dir);
@@ -39,17 +40,7 @@ std::vector<float> const Asteroid::genVerts(unsigned int sz){
     // Set up mesh data
     std::vector<float> temp(2*segs);
     float const unitAngle = 2*piValue/(float)segs;
-    
-    /*float const tempX = 1.0f, tempY = 0.0f;
-    for (unsigned int i = 0; i<segs; ++i){
-        float radiusScale = 0.7f + 0.6f*(rand()%11)/10.0f;
 
-        float rotAngle = unitAngle*i;
-        temp[2*i] = radiusScale*(tempX*cos(rotAngle)-tempY*sin(rotAngle));
-        temp[2*i+1] = radiusScale*(tempX*sin(rotAngle)+tempY*cos(rotAngle));
-    }
-    
-    return temp;*/
     float tempX((1u << sz)/2.0f), tempY = 0.0f;
     float ang = 0;
     for (unsigned int i = 0; i<segs; ++i){
@@ -58,16 +49,6 @@ std::vector<float> const Asteroid::genVerts(unsigned int sz){
         temp[2*i] = radiusScale*(tempX*cos(ang)-tempY*sin(ang));
         temp[2*i+1] = radiusScale*(tempX*sin(ang)+tempY*cos(ang));
         ang += unitAngle;
-        /*
-        temp[2*i] = tempX;
-        temp[2*i+1] = tempY;
-
-        float radiusScale = 0.75f + 0.5*(rand()%11)/10.0f;
-        float tempVal = tempX*cos(unitAngle)-tempY*sin(unitAngle);
-
-        tempY = radiusScale*(tempX*sin(unitAngle)+tempY*cos(unitAngle));
-        tempX = radiusScale*tempVal;
-        */
     }
     return temp;
 }

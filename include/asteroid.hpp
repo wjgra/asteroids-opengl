@@ -6,7 +6,7 @@
 
 class Asteroid : public GameObject {
 public:
-    Asteroid(float s, float pX, float pY, float dir, unsigned int sz);
+    Asteroid(float s, float pX, float pY, float dir, unsigned int sz, int rSpeed);
     ~Asteroid();
     // Simulation functions
     // -- Called every frame
