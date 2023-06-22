@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -22,24 +23,33 @@ public:
     ~TextRenderer();
     void setUpBuffers();
     void releaseBuffers();
-    void draw();
-
+    //void draw();
+    void setChar(char toDraw);
+    void setPosition(float scale, float xPos, float yPos);
+    void drawString(std::string toDraw, float scale, float xPos, float yPos);
+    void drawStringCentred(std::string toDraw, float scale, float xPos, float yPos);
     ShaderProgram shader;
     Texture texture;
 
     std::vector<float> const vertices {
         // positions   // texture coords
-        0.5f, 0.5f,   1.0f, 1.0f,   // top right
-        0.5f, -0.5f,   1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f,   0.0f, 1.0f    // top left 
+        /*0.0625f, -0.0625f,   0.125f, 0.0f,   
+        0.0625f, 0.0625f,   0.125f, 0.125f,   
+        -0.0625f, -0.0625f,   0.0f, 0.0f,   
+        -0.0625f, 0.0625f,   0.0f, 0.125f   */
+        1.0f, 0.0f,   0.125f, 0.0f,   
+        1.0f, 1.0f,   0.125f, 0.125f,   
+        0.0f, 0.0f,   0.0f, 0.0f,   
+        0.0f, 1.0f,   0.0f, 0.125f  
+
     };
 
-    std::vector<GLuint> const elements {1, 0, 3, 2};
+    std::vector<GLuint> const elements {0, 1, 2, 3};
     GLuint VBO, EBO, VAO;
     GLint drawingMode = GL_TRIANGLE_STRIP;
 
-    GLint uniformModelTrans, uniformProjTrans;
+    GLint uniformModelTrans, uniformProjTrans, uniformTextureCoordOffset;
+
 };
 
 #endif

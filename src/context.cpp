@@ -24,6 +24,9 @@ Context::Context(SDL_Window* window, unsigned int width, unsigned int height) : 
 
     // Set viewport size
     glViewport(0, 0, viewportWidth, viewportHeight);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 }
 
 Context::~Context(){

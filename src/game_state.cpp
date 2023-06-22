@@ -8,10 +8,12 @@ GameState::GameState(unsigned int width, unsigned int height) :
     shipScale{float(winWidth)/40.0f},
     wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag")    
 {
-    screen = Screen::play;
+    screen = Screen::menu;
+
+    // code below same as newGame - to combine
     GameObject::timeSinceLastUpdate = 0;
     ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f, 0.0f);
-
+    asteroids.clear();
     // Create asteroids (temporary random selection)
     unsigned int const numAsteroids = 12;
     for (unsigned int i = 0; i < numAsteroids ; ++i){
@@ -20,9 +22,20 @@ GameState::GameState(unsigned int width, unsigned int height) :
             winWidth*temp, 
             winHeight*temp, 
             2*piValue*temp, 
-            i%4);
+            3-(i%4));
         asteroids.push_back(std::move(tempAst));
     }
+
+    // temp - move asteroids on menu a bit before displaying
+    GameObject::timeSinceLastUpdate = 10000000;
+    while(GameObject::timeSinceLastUpdate >= GameObject::timeStep){
+        for (auto&& ast : asteroids){
+            ast->updatePositions();
+        }
+        GameObject::timeSinceLastUpdate -= GameObject::timeStep;
+    }
+    GameObject::timeSinceLastUpdate = 0;
+    // end temp
 
     // Activate shader to initialise uniforms
     wrapShader.useProgram();
@@ -83,8 +96,6 @@ void GameState::frame(unsigned int frameTime){
         default:
         break;
     }
-    // temp!!!
-    textRen.draw();
 }
 
 bool GameState::checkCollisionCoarse(const Asteroid& ast, const Missile& mis){
@@ -96,7 +107,12 @@ void GameState::handleEventsPlay(SDL_Event const& event){
         case SDL_KEYDOWN:
             switch(event.key.keysym.scancode){
                 case SDL_SCANCODE_ESCAPE:
-                    screen = Screen::pause;
+                    // Go to pause screen and clear all input
+                    ship->turnLeft(false);
+                    ship->turnRight(false);
+                    ship->thrustForward(false);
+                    ship->shootMissile(false);
+                    screen = Screen::pause; // to do: implement state change function?
                     break;
                 case SDL_SCANCODE_LEFT:
                     ship->turnLeft(true);
@@ -109,6 +125,9 @@ void GameState::handleEventsPlay(SDL_Event const& event){
                     break;
                 case SDL_SCANCODE_DOWN:
                     ship->shootMissile(true);
+                    break;
+                case SDL_SCANCODE_RETURN: // temp - go to score screen
+                    screen = Screen::score;
                     break;
                 default:
                     break;
@@ -142,7 +161,7 @@ void GameState::handleEventsPause(SDL_Event const& event){
         case SDL_KEYDOWN:
             switch(event.key.keysym.scancode){
                 case SDL_SCANCODE_TAB:
-                    screen = Screen::quit;
+                    screen = Screen::menu;
                     break;
                 case SDL_SCANCODE_RETURN:
                     screen = Screen::play;
@@ -154,18 +173,39 @@ void GameState::handleEventsPause(SDL_Event const& event){
 }
 
 void GameState::handleEventsMenu(SDL_Event const& event){
-
+    switch(event.type){
+        case SDL_KEYDOWN:
+            switch(event.key.keysym.scancode){
+                case SDL_SCANCODE_RETURN:
+                    newGame();
+                    // screen = Screen::play;
+                    break;
+                case SDL_SCANCODE_TAB:
+                    screen = Screen::quit;
+                    break;
+                default:
+                    break;
+            }
+    }
 }
 
 void GameState::handleEventsScore(SDL_Event const& event){
-
+        switch(event.type){
+        case SDL_KEYDOWN:
+            switch(event.key.keysym.scancode){
+                case SDL_SCANCODE_RETURN:
+                    screen = Screen::menu;
+                    break;
+                default:
+                    break;
+            }
+    }
 }
 
 void GameState::framePlay(unsigned int frameTime){
     // Prepare to render
     wrapShader.useProgram();
 
-    glm::mat4 trans;
 
     GameObject::timeSinceLastUpdate += frameTime;
     ship->beginFrame(frameTime);
@@ -190,6 +230,7 @@ void GameState::framePlay(unsigned int frameTime){
             for (auto&& ast : asteroids){
                 if (!(mis->toDestroyThisFrame()) && !ast->toDestroyThisFrame() && checkCollisionCoarse(*ast,*mis)){
                     // To do: fine collision detection
+                    score += ast->size;
                     mis->destroy();
                     ast->destroy();
                     if (ast->size != 0)
@@ -207,49 +248,76 @@ void GameState::framePlay(unsigned int frameTime){
         }
         GameObject::timeSinceLastUpdate -= GameObject::timeStep;
     }
-
-    // Draw missiles
-    glUniform4f(uniformColour, 0.3f, 0.4f, 1.0f, 1.0f);
-    for (auto&& it = ship->missiles.begin(); it < ship->missiles.end(); /*no increment due to potential erasing*/){
-       if ((*it)->toDestroyThisFrame()){
-            it = ship->missiles.erase(it);
-        }
-        else{
-            trans = (*it)->getTransMatrix();
-            glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-            (*it)->draw();
-            ++it;
-        }
-    }
-
-    // Draw asteroids
-    glUniform4f(uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
-    for (auto&& it = asteroids.begin(); it < asteroids.end(); /*no increment due to potential erasing*/){
-       if ((*it)->toDestroyThisFrame()){
-            it = asteroids.erase(it);
-        }
-        else{
-            trans = (*it)->getTransMatrix();
-            glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-            (*it)->draw();
-            ++it;
-        }
-    }
-    
-    // Draw ship (always on top)
-    trans = ship->getTransMatrix();
-    glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-    glUniform4f(uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
-    ship->draw();
+    drawMissiles();
+    drawAsteroids();
+    drawShip();
+    textRen.drawString("SCORE: " + std::to_string(score), 16.0f, winWidth/20, winHeight/20);
 }
 
 void GameState::framePause(unsigned int frameTime){
     // Prepare to render
     wrapShader.useProgram();
 
-    glm::mat4 trans;
+    drawMissiles();
+    drawAsteroids();
+    drawShip();
 
-    // Draw missiles
+    textRen.drawString("SCORE: " + std::to_string(score), 16.0f, winWidth/20, winHeight/20);
+
+    // Draw pause menu
+    textRen.drawStringCentred("PAUSED", 32.0f, winWidth/2, winHeight/2-32.0f);
+    textRen.drawStringCentred("[ENTER] RETURN TO GAME", 16.0f, winWidth/2, winHeight/2+32.0f);
+    textRen.drawStringCentred("[TAB] EXIT TO MENU", 16.0f, winWidth/2, winHeight/2+64.0f);
+}
+
+void GameState::frameMenu(unsigned int frameTime){
+
+    GameObject::timeSinceLastUpdate += frameTime;
+    while(GameObject::timeSinceLastUpdate >= GameObject::timeStep){
+        for (auto&& ast : asteroids){
+            ast->updatePositions();
+        }
+        GameObject::timeSinceLastUpdate -= GameObject::timeStep;
+    }
+    
+
+    wrapShader.useProgram();
+    drawAsteroids();
+
+    textRen.drawStringCentred("ASTEROIDS", 64.0f, winWidth/2, winHeight/2-32.0f);
+    textRen.drawStringCentred("[ENTER] PLAY GAME", 16.0f, winWidth/2, winHeight/2+64.0f);
+    textRen.drawStringCentred("[TAB] QUIT", 16.0f, winWidth/2, winHeight/2+96.0f);
+}
+
+void GameState::frameScore(unsigned int frameTime){
+    
+    GameObject::timeSinceLastUpdate += frameTime;
+    while(GameObject::timeSinceLastUpdate >= GameObject::timeStep){
+        for (auto&& ast : asteroids){
+            ast->updatePositions();
+        }
+        GameObject::timeSinceLastUpdate -= GameObject::timeStep;
+    }
+    
+
+    wrapShader.useProgram();
+    //drawMissiles();
+    drawAsteroids(); // to do: do not change to score screen until all missiles expired
+    //drawShip();
+
+    textRen.drawStringCentred("SCORE: " + std::to_string(score), 32.0f, winWidth/2, winHeight/2-32.0f);
+    textRen.drawStringCentred("[ENTER] EXIT TO MENU", 16.0f, winWidth/2, winHeight/2+32.0f);
+}
+
+void GameState::drawShip(){     // To do: if not destroyed...
+    glm::mat4 trans = ship->getTransMatrix();
+    glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
+    glUniform4f(uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
+    ship->draw();
+}
+
+void GameState::drawMissiles(){
+    glm::mat4 trans;
     glUniform4f(uniformColour, 0.3f, 0.4f, 1.0f, 1.0f);
     for (auto&& it = ship->missiles.begin(); it < ship->missiles.end(); /*no increment due to potential erasing*/){
        if ((*it)->toDestroyThisFrame()){
@@ -262,8 +330,10 @@ void GameState::framePause(unsigned int frameTime){
             ++it;
         }
     }
-
-    // Draw asteroids
+}
+    
+void GameState::drawAsteroids(){
+    glm::mat4 trans;
     glUniform4f(uniformColour, 0.8f, 0.8f, 0.7f, 1.0f);
     for (auto&& it = asteroids.begin(); it < asteroids.end(); /*no increment due to potential erasing*/){
        if ((*it)->toDestroyThisFrame()){
@@ -276,20 +346,23 @@ void GameState::framePause(unsigned int frameTime){
             ++it;
         }
     }
-    
-    // Draw ship (always on top)
-    trans = ship->getTransMatrix();
-    glUniformMatrix4fv(uniformModelTrans, 1, GL_FALSE, glm::value_ptr(trans));
-    glUniform4f(uniformColour, 0.5f, 0.6f, 1.0f, 1.0f);
-    ship->draw();
-
-    // To do: draw pause menu
 }
 
-void GameState::frameMenu(unsigned int frameTime){
-
-}
-
-void GameState::frameScore(unsigned int frameTime){
-
+void GameState::newGame(){
+    score = 0;
+    screen = Screen::play;
+    GameObject::timeSinceLastUpdate = 0;
+    ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f, 0.0f);
+    asteroids.clear();
+    // Create asteroids (temporary random selection)
+    unsigned int const numAsteroids = 12;
+    for (unsigned int i = 0; i < numAsteroids ; ++i){
+        float temp = (float)i/(float)numAsteroids;
+        std::unique_ptr<Asteroid> tempAst = std::make_unique<Asteroid>(shipScale, 
+            winWidth*temp, 
+            winHeight*temp, 
+            2*piValue*temp, 
+            i%4);
+        asteroids.push_back(std::move(tempAst));
+    }
 }

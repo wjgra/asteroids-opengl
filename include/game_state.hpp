@@ -29,8 +29,12 @@ public:
     void framePause(unsigned int frameTime);
     void frameScore(unsigned int frameTime);
     void frameMenu(unsigned int frameTime);
-    //
-    void startGame(); // 
+private:
+    void drawShip();
+    void drawMissiles();
+    void drawAsteroids();
+    void newGame(); // reset all game params - add args for custom set up
+public:
     // Dimensions of notional window
     unsigned int const winWidth = 640;
     unsigned int const winHeight = 480;
@@ -50,6 +54,7 @@ public:
 private:
     bool checkCollisionCoarse(const Asteroid& ast, const Missile& mis);
     int timeSinceLastCollCheck = 0; //consider unifying step forward across draw/coll check (better than passing pointers?)
+    unsigned int score = 0;
 };
 
 #endif
