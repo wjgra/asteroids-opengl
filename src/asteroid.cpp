@@ -6,10 +6,10 @@ Asteroid::Asteroid(float s, float pX, float pY, float dir, unsigned int sz, int 
     GameObject(genVerts(sz), genElts(sz), s, pX, pY, dir),
     size{sz},
     segments{7+3*sz},
-    speed{(5-sz)/2},
+    speed{(4-sz)/2.0f},
     rotPerTimeStep{0.005*rSpeed}
 {
-    maxRadius = 1.25*s*(1u << sz)/2.0f;
+    maxRadius = 1.15*s*(1u << sz)/2.0f;
     velocityX = speed*cos(dir);
     velocityY = speed*sin(dir);
     updateNextPos();
@@ -41,7 +41,7 @@ std::vector<float> const Asteroid::genVerts(unsigned int sz){
     std::vector<float> temp(2*segs);
     float const unitAngle = 2*piValue/(float)segs;
 
-    float tempX((1u << sz)/2.0f), tempY = 0.0f;
+    float tempX(float(1u << sz)/2.0f), tempY = 0.0f;
     float ang = 0;
     for (unsigned int i = 0; i<segs; ++i){
         float tempRand = (rand()%11)/10.0f;

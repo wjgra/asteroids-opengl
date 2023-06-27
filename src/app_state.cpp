@@ -28,22 +28,7 @@ void AppState::handleEvents(SDL_Event const&  event){
         default:
             break;
     }
-    switch (gameState.screen){
-        case GameState::Screen::play:
-            gameState.handleEventsPlay(event);
-        break;
-        case GameState::Screen::pause:
-            gameState.handleEventsPause(event);
-        break;
-        case GameState::Screen::menu:
-            gameState.handleEventsMenu(event);
-        break;
-        case GameState::Screen::score:
-            gameState.handleEventsScore(event);
-        break;
-        default:
-        break;
-    }
+    gameState.handleEvents(event);
 }
 
 void AppState::frame(unsigned int frameTime){ // Move to app state frame()

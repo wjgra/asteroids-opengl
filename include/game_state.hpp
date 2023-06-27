@@ -8,6 +8,7 @@
 
 #include <cmath>
 #include <time.h>
+#include <vector>
 
 #include "../include/ship.hpp"
 #include "../include/asteroid.hpp"
@@ -21,20 +22,27 @@ public:
     ~GameState();
     void frame(unsigned int frameTime);
     // Event handlers
+    void handleEvents(SDL_Event const&  event);
+private:   
     void handleEventsPlay(SDL_Event const&  event);
     void handleEventsPause(SDL_Event const&  event);
     void handleEventsScore(SDL_Event const&  event);
     void handleEventsMenu(SDL_Event const&  event);
-    //
+
     void framePlay(unsigned int frameTime);
     void framePause(unsigned int frameTime);
     void frameScore(unsigned int frameTime);
     void frameMenu(unsigned int frameTime);
-private:
+
     void drawShip();
     void drawMissiles();
     void drawAsteroids();
-    void newGame(std::vector<unsigned int> astLayout); // reset all game params - add args for custom set up
+    void newGame(std::vector<unsigned int> const& astLayout  = std::vector<unsigned int>({2, 4, 6, 1})); // reset all game params
+    void newWave();
+    bool checkCollisionCoarse(const Asteroid& ast, const Missile& mis);
+    bool checkCollisionCoarse(const Asteroid& ast, const Ship& sh);
+    bool checkCollisionFine(const Asteroid& ast, const Missile& mis);
+    bool checkCollisionFine(const Asteroid& ast, const Ship& sh);
 public:
     // Dimensions of notional window
     unsigned int const winWidth = 640;
@@ -53,9 +61,14 @@ public:
     // 
     enum class Screen {play, pause, score, menu, quit} screen;
 private:
-    bool checkCollisionCoarse(const Asteroid& ast, const Missile& mis);
+    std::vector<int> initialAsteroidField;
+    int wave = 0;
     int timeSinceLastCollCheck = 0; //consider unifying step forward across draw/coll check (better than passing pointers?)
     unsigned int score = 0;
+    // struct Triangle {float x1, y1, x2, y2, x3, y3;};
+    struct Triangle {float points[6];};
+    bool pointsLieOnOneSide(Triangle const& tri1, Triangle const& tri2);
+    bool trianglesIntersect(Triangle const& tri1, Triangle const& tri2);
 };
 
 #endif

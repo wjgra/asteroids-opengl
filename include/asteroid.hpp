@@ -18,7 +18,7 @@ public:
     bool getVisibility() const;
 public:
     // Simulation parameters
-    unsigned int const size; // segments = 2^(3+size)+size
+    unsigned int const size;
     unsigned const segments;
     float const speed = 1;
     float const rotPerTimeStep = 0.5e-2;

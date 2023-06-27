@@ -73,7 +73,134 @@ void GameState::frame(unsigned int frameTime){
 }
 
 bool GameState::checkCollisionCoarse(const Asteroid& ast, const Missile& mis){
-    return (std::abs(mis.posX-ast.posX) <= ast.maxRadius) && (std::abs(mis.posY-ast.posY) <= ast.maxRadius);
+    float colRadius = ast.maxRadius + 0.25f * shipScale;
+    return (std::abs(mis.posX-ast.posX) <= colRadius) && (std::abs(mis.posY-ast.posY) <= colRadius);
+}
+
+bool GameState::pointsLieOnOneSide(Triangle const& tri1, Triangle const& tri2){
+    // Based on this answer: https://stackoverflow.com/a/44269990
+
+  float dXa = tri1.points[0] - tri2.points[4];
+  float dYa = tri1.points[1] - tri2.points[5];
+  float dXb = tri1.points[2] - tri2.points[4];
+  float dYb = tri1.points[3] - tri2.points[5];
+  float dXc = tri1.points[4] - tri2.points[4];
+  float dYc = tri1.points[5] - tri2.points[5];
+  float dX21 = tri2.points[4] - tri2.points[2];
+  float dY12 = tri2.points[3] - tri2.points[5];
+  float D = dY12 * (tri2.points[0] - tri2.points[4]) + dX21 * (tri2.points[1] - tri2.points[5]);
+  float sa = dY12 * dXa + dX21 * dYa;
+  float sb = dY12 * dXb + dX21 * dYb;
+  float sc = dY12 * dXc + dX21 * dYc;
+  float ta = (tri2.points[5] - tri2.points[1]) * dXa + (tri2.points[0] - tri2.points[4]) * dYa;
+  float tb = (tri2.points[5] - tri2.points[1]) * dXb + (tri2.points[0] - tri2.points[4]) * dYb;
+  float tc = (tri2.points[5] - tri2.points[1]) * dXc + (tri2.points[0] - tri2.points[4]) * dYc;
+  if (D < 0) return ((sa >= 0 && sb >= 0 && sc >= 0) ||
+                     (ta >= 0 && tb >= 0 && tc >= 0) ||
+                     (sa+ta <= D && sb+tb <= D && sc+tc <= D));
+  else return ((sa <= 0 && sb <= 0 && sc <= 0) ||
+          (ta <= 0 && tb <= 0 && tc <= 0) ||
+          (sa+ta >= D && sb+tb >= D && sc+tc >= D));
+}
+
+bool GameState::trianglesIntersect(Triangle const& tri1, Triangle const& tri2){
+    return !(pointsLieOnOneSide(tri1, tri2) || pointsLieOnOneSide(tri2, tri1));
+}
+
+bool GameState::checkCollisionFine(const Asteroid& ast, const Missile& mis){
+    return true;
+}
+
+// Ship argument not needed, but allows for multiplayer if needed
+bool GameState::checkCollisionCoarse(const Asteroid& ast, const Ship& sh){
+    float colRadius = ast.maxRadius + 0.707f*shipScale;
+    return (std::abs(sh.posX-ast.posX) <= colRadius) && (std::abs(sh.posY-ast.posY) <= colRadius);
+}
+
+
+bool GameState::checkCollisionFine(const Asteroid& ast, const Ship& sh){
+    Triangle shipL, shipR, astSeg;
+    auto xRot =  [](float x, float y, float angle) {return std::cos(angle) * x - std::sin(angle) * y;};
+    auto yRot =  [](float x, float y, float angle) {return std::sin(angle) * x + std::cos(angle) * y;};
+    /*
+    for (int i = 0; i < 3; ++i){
+        // float alpha = sh.orientation;
+        // shipR.points[2*i] = shipScale*(std::cos(alpha)*sh.vertices[2*i]-std::sin(alpha)*sh.vertices[2*i+1]) + sh.posX - ast.posX;
+        // shipR.points[2*i+1] = shipScale*(std::sin(alpha)*sh.vertices[2*i]+std::cos(alpha)*sh.vertices[2*i+1]) + sh.posY - ast.posY;
+        float tempX = shipScale * xRot(sh.vertices[2*i], sh.vertices[2*i+1], sh.orientation) + sh.posX - ast.posX;
+        float tempY = shipScale * yRot(sh.vertices[2*i], sh.vertices[2*i+1], sh.orientation) + sh.posY - ast.posY;
+        shipR.points[2*i] = xRot(tempX, tempY, -ast.orientation);
+        shipR.points[2*i + 1] = yRot(tempX, tempY, -ast.orientation);
+    }
+
+    for (int i = 3; i < 6; ++i){
+        float x = i != 5 ? sh.vertices[2*i] : sh.vertices[0];
+        float y = i != 5 ? sh.vertices[2*i+1] : sh.vertices[1];
+        float tempX = shipScale * xRot(x, y, sh.orientation) + sh.posX - ast.posX;
+        float tempY = shipScale * yRot(x, y, sh.orientation) + sh.posY - ast.posY;
+        shipL.points[2*i] = xRot(tempX, tempY, -ast.orientation);
+        shipL.points[2*i + 1] = yRot(tempX, tempY, -ast.orientation);
+    }
+    
+
+    float lastX = ast.vertices.end()[-2]*shipScale, lastY = ast.vertices.end()[-1]*shipScale;
+    float currentX, currentY;   
+
+    for (int i = 0 ; i < ast.vertices.size()/2; ++i){
+        currentX = ast.vertices[2*i]*shipScale;
+        currentY = ast.vertices[2*i+1]*shipScale;
+        astSeg = {0.0f, 0.0f, lastX, lastY, currentX, currentY};
+        lastX = currentX, lastY = currentY;
+        if (trianglesIntersect(shipL, astSeg) || trianglesIntersect(shipR, astSeg)) 
+            return true;
+    }
+    */
+     for (int i = 0; i < 3; ++i){
+ shipR.points[2*i] = shipScale * xRot(sh.vertices[2*i], sh.vertices[2*i+1], sh.orientation) + sh.posX;
+        shipR.points[2*i + 1] = shipScale * yRot(sh.vertices[2*i], sh.vertices[2*i+1], sh.orientation) + sh.posY;
+
+    }
+
+    for (int i = 3; i < 6; ++i){
+        float x = i != 5 ? sh.vertices[2*i] : sh.vertices[0];
+        float y = i != 5 ? sh.vertices[2*i+1] : sh.vertices[1];
+        shipL.points[2*(i-3)] = shipScale * xRot(x, y, sh.orientation) + sh.posX;
+        shipL.points[2*(i-3) + 1] = shipScale * yRot(x, y, sh.orientation) + sh.posY;
+    }
+    
+    float lastX = shipScale * xRot(ast.vertices.end()[-2], ast.vertices.end()[-1], ast.orientation) + ast.posX; 
+    float lastY = shipScale * yRot(ast.vertices.end()[-2], ast.vertices.end()[-1], ast.orientation) + ast.posY;
+    float currentX, currentY;   
+
+    for (int i = 0 ; i < ast.vertices.size()/2; ++i){
+        currentX = shipScale * xRot(ast.vertices[2*i], ast.vertices[2*i+1], ast.orientation) + ast.posX; 
+        currentY = shipScale * yRot(ast.vertices[2*i], ast.vertices[2*i+1], ast.orientation) + ast.posY;
+        astSeg = {ast.posX, ast.posY, lastX, lastY, currentX, currentY};
+        lastX = currentX, lastY = currentY;
+        if (trianglesIntersect(shipL, astSeg) || trianglesIntersect(shipR, astSeg)) 
+            return true;
+    }
+    
+    return false;
+}
+
+void GameState::handleEvents(SDL_Event const& event){
+    switch (screen){
+        case GameState::Screen::play:
+            handleEventsPlay(event);
+        break;
+        case GameState::Screen::pause:
+            handleEventsPause(event);
+        break;
+        case GameState::Screen::menu:
+            handleEventsMenu(event);
+        break;
+        case GameState::Screen::score:
+            handleEventsScore(event);
+        break;
+        default:
+        break;
+    }
 }
 
 void GameState::handleEventsPlay(SDL_Event const& event){
@@ -100,9 +227,9 @@ void GameState::handleEventsPlay(SDL_Event const& event){
                 case SDL_SCANCODE_DOWN:
                     ship->shootMissile(true);
                     break;
-                case SDL_SCANCODE_RETURN: // temp - go to score screen
-                    screen = Screen::score;
-                    break;
+                // case SDL_SCANCODE_RETURN: // temp - go to score screen
+                   // screen = Screen::score;
+                    // break;
                 default:
                     break;
             }
@@ -151,7 +278,7 @@ void GameState::handleEventsMenu(SDL_Event const& event){
         case SDL_KEYDOWN:
             switch(event.key.keysym.scancode){
                 case SDL_SCANCODE_RETURN:
-                    newGame({2,5,6,1});
+                    newGame();
                     screen = Screen::play;
                     break;
                 case SDL_SCANCODE_TAB:
@@ -176,6 +303,8 @@ void GameState::handleEventsScore(SDL_Event const& event){
     }
 }
 
+#include <chrono>
+
 void GameState::framePlay(unsigned int frameTime){
     // Prepare to render
     wrapShader.useProgram();
@@ -191,6 +320,7 @@ void GameState::framePlay(unsigned int frameTime){
     }
 
     while(GameObject::timeSinceLastUpdate >= GameObject::timeStep){
+
         ship->updatePositions();
         ship->updateMissiles();
         for (auto&& ast : asteroids){
@@ -199,12 +329,14 @@ void GameState::framePlay(unsigned int frameTime){
         for (auto&& mis : ship->missiles){
             mis->updatePositions();
         }
+
         // Check collisions
         for (auto&& mis : ship->missiles){
             for (auto&& ast : asteroids){
-                if (!(mis->toDestroyThisFrame()) && !ast->toDestroyThisFrame() && checkCollisionCoarse(*ast,*mis)){
+                if (!(mis->toDestroyThisFrame()) && !(ast->toDestroyThisFrame()) 
+                    && checkCollisionCoarse(*ast,*mis) && checkCollisionFine(*ast, *mis)){
                     // To do: fine collision detection
-                    score += ast->size;
+                    score += (4 - ast->size);
                     mis->destroy();
                     ast->destroy();
                     if (ast->size != 0)
@@ -222,12 +354,41 @@ void GameState::framePlay(unsigned int frameTime){
                 }
             }
         }
+
+        for (auto&& ast : asteroids){
+            if (!(ast->toDestroyThisFrame()) && checkCollisionCoarse(*ast, *ship) && checkCollisionFine(*ast, *ship)){
+                // Ship and asteroid are destroyed in collision
+                ast->destroy();
+                score += (4 - ast->size);
+                // Spawn new asteroids (duplicate)
+                                    if (ast->size != 0)
+                    {
+                        float deflection = piValue/10.0f;
+                        float dirAst = atan2(ship->velocityY, ship->velocityX); // modified! based on ship speed
+                        int rotSpeedModifier = (rand() % 5) - 2;
+                        if (!rotSpeedModifier) ++rotSpeedModifier;
+                        std::unique_ptr<Asteroid> newAst1 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst+deflection,ast->size-1, rotSpeedModifier);
+                        std::unique_ptr<Asteroid> newAst2 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst-deflection,ast->size-1, rotSpeedModifier);
+                        asteroids.push_back(std::move(newAst1));
+                        asteroids.push_back(std::move(newAst2));
+                    }
+                screen = Screen::score;
+            }
+        }
+
+        if (asteroids.size() == 0){
+            newWave();
+        }
+
         GameObject::timeSinceLastUpdate -= GameObject::timeStep;
     }
+    
     drawMissiles();
     drawAsteroids();
     drawShip();
     textRen.drawString("SCORE: " + std::to_string(score), 16.0f, winWidth/20, winHeight/20);
+    textRen.drawString("WAVE: " + std::to_string(wave), 16.0f, 15 * winWidth/20, winHeight/20);
+
 }
 
 void GameState::framePause(unsigned int frameTime){
@@ -325,14 +486,25 @@ void GameState::drawAsteroids(){
     }
 }
 
-void GameState::newGame(std::vector<unsigned int> astLayout){
+void GameState::newGame(std::vector<unsigned int> const& astLayout){
+    initialAsteroidField.clear();
+    for (int i = 0 ; i < 4 ; ++i){
+        if (i < astLayout.size()){
+            initialAsteroidField.push_back(astLayout[i]);
+        }
+        else{
+            initialAsteroidField.push_back(0);
+        }
+    }
     score = 0;
+    wave = 0;
     GameObject::timeSinceLastUpdate = 0;
     ship = std::make_unique<Ship>(shipScale, winWidth/2.0f, winHeight/2.0f, 0.0f);
 
     asteroids.clear();
     srand(time(NULL));
-    
+    newWave();
+    /*
     for (unsigned int size = 0 ; size < std::min((int)astLayout.size(), 4); ++size){
         for (unsigned int i = 0 ; i < astLayout[size]; ++i){
             float x = winWidth * (0.66f + (rand() % 20) / 30.0f);
@@ -344,4 +516,21 @@ void GameState::newGame(std::vector<unsigned int> astLayout){
             asteroids.push_back(std::move(tempAst));
         }
     }
+    */
+}
+
+void GameState::newWave(){
+    float xOffset = ship->posX, yOffset = ship->posY; // Ensure wave is centred on ship 
+    for (unsigned int size = 0 ; size < 4 ; ++size){
+        for (unsigned int i = 0 ; i < initialAsteroidField[size] + wave; ++i){
+            float x = xOffset + winWidth * (0.16f + (rand() % 20) / 30.0f);
+            float y = yOffset + winHeight * (0.16f + (rand() % 20) / 30.0f);
+            float dir = 2 * piValue * (rand() % 60) / 60.0f;
+            int rotSpeedModifier = (rand() % 5) - 2;
+            if (!rotSpeedModifier) ++rotSpeedModifier;
+            std::unique_ptr<Asteroid> tempAst = std::make_unique<Asteroid>(shipScale, x, y, dir, size, rotSpeedModifier);
+            asteroids.push_back(std::move(tempAst));
+        }
+    }
+    ++wave;
 }
