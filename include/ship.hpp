@@ -36,8 +36,6 @@ public:
     float const thrust = 2.4f / 10000000000.0f; // old value: drag*480.0f/(2000000.0f)
     unsigned int const minShootingInterval = 500000;
 private:
-    //float scale, posX, posY, velocityX, velocityY, orientation, nextOrientation, 
-      //  nextPosX, nextPosY, nextVelocityX, nextVelocityY;
     bool isVisible, isThrusting, isTurningLeft, isTurningRight, isShooting;
     unsigned int timeSinceLastShot;
 public:

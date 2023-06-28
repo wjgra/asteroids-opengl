@@ -25,7 +25,6 @@ int main(){
             while (SDL_PollEvent(&event)){
                 appState.handleEvents(event);
             }
-            
             // Get duration of current frame in microseconds
             auto t_now = std::chrono::high_resolution_clock::now();
             unsigned int frameTime = std::chrono::duration_cast<std::chrono::microseconds>(t_now-t_start).count();
@@ -38,7 +37,6 @@ int main(){
             }
 
             t_start = t_now;
-
             appState.frame(frameTime);
         }
 
@@ -53,4 +51,4 @@ int main(){
 }
 
 // To do:
-// - Rule of 3 for new classes
+// - Rule of 5 for new classes
