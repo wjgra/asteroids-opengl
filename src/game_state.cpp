@@ -6,7 +6,7 @@ GameState::GameState(unsigned int width, unsigned int height) :
     winWidth{width},
     winHeight{height},
     shipScale{float(winWidth)/40.0f},
-    wrapShader(".//shaders//vertex.vert", ".//shaders//fragment.frag")    
+    wrapShader(".//shaders//wrap.vert", ".//shaders//wrap.frag")    
 {
     screen = Screen::menu;
     newGame({10,5,6,1});
