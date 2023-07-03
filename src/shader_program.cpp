@@ -17,7 +17,6 @@ ShaderProgram::ShaderProgram(const std::string vertexPath, const std::string fra
         #else
         vertexFile.open((".//shaders_web//"+vertexPath.substr(10)).c_str());
         fragmentFile.open((".//shaders_web//"+fragmentPath.substr(10)).c_str());
-        std::cout << (".//shaders_web"+vertexPath.substr(10)) <<"\n";
         #endif
 
         std::stringstream vertexStream, fragmentStream;

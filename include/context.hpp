@@ -17,6 +17,18 @@ class Context{
 public:
     Context(SDL_Window* window, unsigned int width, unsigned int height);
     ~Context();
+    Context(const Context& other) = delete;
+    Context &operator=(const Context& other) = delete;
+    Context(Context&& other) : context{other.context}{
+        other.context = 0;
+    }
+    Context &operator=(Context&& other){
+        if (this != &other){
+            SDL_GL_DeleteContext(context);
+            std::swap(context, other.context);
+        }
+        return *this;
+    }
     SDL_GLContext getContext();
     bool const useVsync = true;
     // Dimensions of OpenGL viewport

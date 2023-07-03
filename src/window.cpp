@@ -11,7 +11,6 @@ Window::Window(unsigned int width, unsigned int height) : winWidth{width}, winHe
     #endif
 
     // Set OpenGL attributes - must be done before window creation!
-    
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     #ifndef __EMSCRIPTEN__
     // Request an OpenGL 3.3 context

@@ -23,7 +23,6 @@
 class AppState{
 public:
     AppState(unsigned int scale);
-    ~AppState();
     void beginLoop();
     void mainLoop();
     void handleEvents(SDL_Event const&  event);

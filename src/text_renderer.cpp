@@ -3,8 +3,8 @@
 // Currently based on Drawable can we inherit????
 
 TextRenderer::TextRenderer() : 
-    texture{},
-    shader(".//shaders//text.vert", ".//shaders//text.frag")
+    shader(".//shaders//text.vert", ".//shaders//text.frag"),
+    texture{}
 {
     setUpBuffers();
     shader.useProgram();

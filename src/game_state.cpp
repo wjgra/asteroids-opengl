@@ -50,9 +50,6 @@ GameState::GameState(unsigned int width, unsigned int height) :
     uniformColour = wrapShader.getUniformLocation("inputColour"); 
 }
 
-GameState::~GameState(){
-}
-
 void GameState::handleEvents(SDL_Event const& event){
     switch (screen){
         case GameState::Screen::play:
@@ -180,7 +177,7 @@ void GameState::frame(unsigned int frameTime){
             framePlay(frameTime);
         break;
         case GameState::Screen::pause:
-            framePause(frameTime);
+            framePause();
         break;
         case GameState::Screen::menu:
             frameMenu(frameTime);
@@ -196,7 +193,6 @@ void GameState::frame(unsigned int frameTime){
 void GameState::framePlay(unsigned int frameTime){
     // Prepare to render
     wrapShader.useProgram();
-
 
     GameObject::timeSinceLastUpdate += frameTime;
     ship->beginFrame(frameTime);
@@ -220,21 +216,14 @@ void GameState::framePlay(unsigned int frameTime){
         for (auto&& mis : ship->missiles){
             for (auto&& ast : asteroids){
                 if (!(mis->toDestroyThisFrame()) && !(ast->toDestroyThisFrame()) 
-                    && checkCollisionCoarse(*ast,*mis) && checkCollisionFine(*ast, *mis)){
-                    // To do: fine collision detection
+                    && checkCollisionCoarse(*ast,*mis) /*&& checkCollisionFine(*ast, *mis)*/){
                     score += (4 - ast->size);
                     mis->destroy();
                     ast->destroy();
                     if (ast->size != 0)
                     {
-                        float deflection = piValue/10.0f;
                         float dirAst = atan2(ast->velocityY, ast->velocityX);
-                        int rotSpeedModifier = (rand() % 5) - 2;
-                        if (!rotSpeedModifier) ++rotSpeedModifier;
-                        std::unique_ptr<Asteroid> newAst1 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst+deflection,ast->size-1, rotSpeedModifier);
-                        std::unique_ptr<Asteroid> newAst2 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst-deflection,ast->size-1, rotSpeedModifier);
-                        asteroids.push_back(std::move(newAst1));
-                        asteroids.push_back(std::move(newAst2));
+                        spawnNewAsteroidPair(ast, dirAst);
                     }
                     break;
                 }
@@ -248,17 +237,11 @@ void GameState::framePlay(unsigned int frameTime){
                 ast->destroy();
                 score += (4 - ast->size);
                 // Spawn new asteroids (duplicate)
-                                    if (ast->size != 0)
-                    {
-                        float deflection = piValue/10.0f;
-                        float dirAst = atan2(ship->velocityY, ship->velocityX); // modified! based on ship speed
-                        int rotSpeedModifier = (rand() % 5) - 2;
-                        if (!rotSpeedModifier) ++rotSpeedModifier;
-                        std::unique_ptr<Asteroid> newAst1 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst+deflection,ast->size-1, rotSpeedModifier);
-                        std::unique_ptr<Asteroid> newAst2 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,dirAst-deflection,ast->size-1, rotSpeedModifier);
-                        asteroids.push_back(std::move(newAst1));
-                        asteroids.push_back(std::move(newAst2));
-                    }
+                if (ast->size != 0)
+                {
+                    float dirAst = atan2(ship->velocityY, ship->velocityX); // modified! based on ship speed
+                    spawnNewAsteroidPair(ast, dirAst);
+                }
                 screen = Screen::score;
             }
         }
@@ -275,10 +258,9 @@ void GameState::framePlay(unsigned int frameTime){
     drawShip();
     textRen.drawString("SCORE: " + std::to_string(score), 16.0f, winWidth/20, winHeight/20);
     textRen.drawString("WAVE: " + std::to_string(wave), 16.0f, 15 * winWidth/20, winHeight/20);
-
 }
 
-void GameState::framePause(unsigned int frameTime){
+void GameState::framePause(){
     // Prepare to render
     wrapShader.useProgram();
 
@@ -304,7 +286,6 @@ void GameState::frameMenu(unsigned int frameTime){
         GameObject::timeSinceLastUpdate -= GameObject::timeStep;
     }
     
-
     wrapShader.useProgram();
     drawAsteroids();
 
@@ -325,12 +306,9 @@ void GameState::frameScore(unsigned int frameTime){
         }
         GameObject::timeSinceLastUpdate -= GameObject::timeStep;
     }
-    
 
     wrapShader.useProgram();
-    //drawMissiles();
-    drawAsteroids(); // to do: do not change to score screen until all missiles expired
-    //drawShip();
+    drawAsteroids();
 
     textRen.drawStringCentred("SCORE: " + std::to_string(score), 32.0f, winWidth/2, winHeight/2-32.0f);
     textRen.drawStringCentred("[ENTER] EXIT TO MENU", 16.0f, winWidth/2, winHeight/2+32.0f);
@@ -341,11 +319,13 @@ bool GameState::checkCollisionCoarse(const Asteroid& ast, const Missile& mis) co
     return (std::abs(mis.posX-ast.posX) <= colRadius) && (std::abs(mis.posY-ast.posY) <= colRadius);
 }
 
+/*
 bool GameState::checkCollisionFine(const Asteroid& ast, const Missile& mis) const{
     // Whilst I could make this 'correct' like for ship-asteroid collisions (using trianglesIntersect function),
     // the game is already hard enough! Generous hitboxes are the least I can do...
     return true;
 }
+*/
 
 // Ship argument not needed, but allows for extension to multiplayer
 bool GameState::checkCollisionCoarse(const Asteroid& ast, const Ship& sh) const{
@@ -375,7 +355,7 @@ bool GameState::checkCollisionFine(const Asteroid& ast, const Ship& sh) const{
     float lastY = shipScale * yRot(ast.vertices.end()[-2], ast.vertices.end()[-1], ast.orientation) + ast.posY;
     float currentX, currentY;   
 
-    for (int i = 0 ; i < ast.vertices.size()/2; ++i){
+    for (unsigned int i = 0 ; i < ast.vertices.size()/2; ++i){
         currentX = shipScale * xRot(ast.vertices[2*i], ast.vertices[2*i+1], ast.orientation) + ast.posX; 
         currentY = shipScale * yRot(ast.vertices[2*i], ast.vertices[2*i+1], ast.orientation) + ast.posY;
         astSeg = {ast.posX, ast.posY, lastX, lastY, currentX, currentY};
@@ -416,6 +396,8 @@ bool GameState::pointsLieOnOneSide(Triangle const& tri1, Triangle const& tri2) c
 bool GameState::trianglesIntersect(Triangle const& tri1, Triangle const& tri2) const{
     return !(pointsLieOnOneSide(tri1, tri2) || pointsLieOnOneSide(tri2, tri1));
 }
+
+
 
 void GameState::drawShip() const{ 
     glm::mat4 trans = ship->getTransMatrix();
@@ -459,7 +441,7 @@ void GameState::drawAsteroids(){
 // Starts a new game with number of asteroids of size 0, 1, 2, 3 according to input vector
 void GameState::newGame(std::vector<unsigned int> const& astLayout){
     initialAsteroidField.clear();
-    for (int i = 0 ; i < 4 ; ++i){
+    for (unsigned int i = 0 ; i < 4 ; ++i){
         if (i < astLayout.size()){
             initialAsteroidField.push_back(astLayout[i]);
         }
@@ -475,19 +457,6 @@ void GameState::newGame(std::vector<unsigned int> const& astLayout){
     asteroids.clear();
     srand(time(NULL));
     newWave();
-    /*
-    for (unsigned int size = 0 ; size < std::min((int)astLayout.size(), 4); ++size){
-        for (unsigned int i = 0 ; i < astLayout[size]; ++i){
-            float x = winWidth * (0.66f + (rand() % 20) / 30.0f);
-            float y = winHeight * (0.66f + (rand() % 20) / 30.0f);
-            float dir = 2 * piValue * (rand() % 60) / 60.0f;
-            int rotSpeedModifier = (rand() % 5) - 2;
-            if (!rotSpeedModifier) ++rotSpeedModifier;
-            std::unique_ptr<Asteroid> tempAst = std::make_unique<Asteroid>(shipScale, x, y, dir, size, rotSpeedModifier);
-            asteroids.push_back(std::move(tempAst));
-        }
-    }
-    */
 }
 
 // Generates a field of asteroids that do not coincide with the ship
@@ -505,4 +474,14 @@ void GameState::newWave(){
         }
     }
     ++wave;
+}
+
+void GameState::spawnNewAsteroidPair(std::unique_ptr<Asteroid>& ast, float referenceDir){
+    float deflection = piValue/10.0f;
+    int rotSpeedModifier = (rand() % 5) - 2;
+    if (!rotSpeedModifier) ++rotSpeedModifier;
+    std::unique_ptr<Asteroid> newAst1 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,referenceDir+deflection,ast->size-1, rotSpeedModifier);
+    std::unique_ptr<Asteroid> newAst2 = std::make_unique<Asteroid>(shipScale,ast->posX,ast->posY,referenceDir-deflection,ast->size-1, rotSpeedModifier);
+    asteroids.push_back(std::move(newAst1));
+    asteroids.push_back(std::move(newAst2));
 }

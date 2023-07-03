@@ -24,7 +24,6 @@
 class GameState{
 public:
     GameState(unsigned int width, unsigned int height);
-    ~GameState();
     void frame(unsigned int frameTime);
     void handleEvents(SDL_Event const&  event);
 private:   
@@ -35,13 +34,13 @@ private:
     void handleEventsMenu(SDL_Event const&  event);
     // Execute every frame
     void framePlay(unsigned int frameTime);
-    void framePause(unsigned int frameTime);
+    void framePause();
     void frameScore(unsigned int frameTime);
     void frameMenu(unsigned int frameTime);
     // -- Collisions
     bool checkCollisionCoarse(const Asteroid& ast, const Missile& mis) const;
     bool checkCollisionCoarse(const Asteroid& ast, const Ship& sh) const;
-    bool checkCollisionFine(const Asteroid& ast, const Missile& mis) const;
+    // bool checkCollisionFine(const Asteroid& ast, const Missile& mis) const;
     bool checkCollisionFine(const Asteroid& ast, const Ship& sh) const;
     struct Triangle {float points[6];}; // struct Triangle {float x1, y1, x2, y2, x3, y3;};
     bool pointsLieOnOneSide(Triangle const& tri1, Triangle const& tri2) const;
@@ -53,6 +52,7 @@ private:
     // Utility functions
     void newGame(std::vector<unsigned int> const& astLayout  = std::vector<unsigned int>({2, 4, 6, 1})); // reset all game params
     void newWave();
+    void spawnNewAsteroidPair(std::unique_ptr<Asteroid>& ast, float referenceDir);
 public:
     enum class Screen {play, pause, score, menu, quit} screen;
     // Drawable game objects

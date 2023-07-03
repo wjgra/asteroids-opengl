@@ -8,9 +8,6 @@ AppState::AppState(unsigned int scale) :
 {
 }
 
-AppState::~AppState(){
-}
-
 void AppState::beginLoop(){
     tStart = std::chrono::high_resolution_clock::now();
 }
