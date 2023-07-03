@@ -1,7 +1,7 @@
 #ifndef _ASTEROIDS_SHIP_HPP_
 #define _ASTEROIDS_SHIP_HPP_
 
-#include "../include/glad/glad.h"
+// #include "../include/glad/glad.h"
 #include "../include/game_object.hpp"
 #include "../include/missile.hpp"
 

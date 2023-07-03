@@ -6,13 +6,19 @@ Window::Window(unsigned int width, unsigned int height) : winWidth{width}, winHe
         throw "Failed to initialise SDL";
     }
 
-    
+    #ifndef __EMSCRIPTEN__
     SDL_GL_LoadLibrary(nullptr); 
+    #endif
+
     // Set OpenGL attributes - must be done before window creation!
-    // Request an OpenGL 3.3 context
+    
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    #ifndef __EMSCRIPTEN__
+    // Request an OpenGL 3.3 context
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    #endif
+    
     // Request a depth buffer
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);

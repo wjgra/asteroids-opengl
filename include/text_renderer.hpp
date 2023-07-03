@@ -1,15 +1,21 @@
 #ifndef _ASTEROIDS_TEXT_RENDERER_HPP_
 #define _ASTEROIDS_TEXT_RENDERER_HPP_
 
-#include "../include/glad/glad.h"
-
+#ifdef __EMSCRIPTEN__
 #include <GL/gl.h>
-#include <GL/glu.h>
+#include <GLES3/gl3.h>
+#else
+#include "../include/glad/glad.h"
+#endif
+
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 
 #include <iostream>
 #include <vector>
 #include <string>
 
+#define GLM_FORCE_PURE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 

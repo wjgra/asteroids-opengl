@@ -3,6 +3,7 @@
 // Constructs a ShaderProgram object
 // To do: move file reading out of the constructor
 ShaderProgram::ShaderProgram(const std::string vertexPath, const std::string fragmentPath){
+
     std::string vertexSource, fragmentSource;
     std::ifstream vertexFile, fragmentFile;
 
@@ -10,8 +11,15 @@ ShaderProgram::ShaderProgram(const std::string vertexPath, const std::string fra
     fragmentFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     try 
     {
+        #ifndef __EMSCRIPTEN__
         vertexFile.open(vertexPath.c_str());
         fragmentFile.open(fragmentPath.c_str());
+        #else
+        vertexFile.open((".//shaders_web//"+vertexPath.substr(10)).c_str());
+        fragmentFile.open((".//shaders_web//"+fragmentPath.substr(10)).c_str());
+        std::cout << (".//shaders_web"+vertexPath.substr(10)) <<"\n";
+        #endif
+
         std::stringstream vertexStream, fragmentStream;
 
         vertexStream << vertexFile.rdbuf();
@@ -30,6 +38,7 @@ ShaderProgram::ShaderProgram(const std::string vertexPath, const std::string fra
 
     GLuint vertexShaderID = compileShader((const char*)vertexSource.c_str(), GL_VERTEX_SHADER);
     GLuint fragmentShaderID = compileShader((const char*)fragmentSource.c_str(), GL_FRAGMENT_SHADER);
+
 
     programID = glCreateProgram();
 
@@ -56,7 +65,11 @@ GLuint ShaderProgram::compileShader(const char *source, GLenum shaderType){
     // Compile shader from source
     unsigned int shaderID;
     shaderID = glCreateShader(shaderType);
+    #ifndef __EMSCRIPTEN__
     glShaderSource(shaderID, 1, &source, NULL);
+    #else
+    glShaderSource(shaderID, 1, (const char**)&source, NULL);
+    #endif
     glCompileShader(shaderID);
     // Check for errors in compiling shader
     int success, logLength;
@@ -66,7 +79,7 @@ GLuint ShaderProgram::compileShader(const char *source, GLenum shaderType){
         glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &logLength);
         std::vector<char> errorLog((logLength > 1)? logLength : 1);
         glGetShaderInfoLog(shaderID, logLength, NULL, errorLog.data());
-        std::cout << "Shader at " << source << " failed to compile.\n" << errorLog.data() << std::endl;
+        std::cout << "Shader (" << source << ") failed to compile.\n" << errorLog.data() << std::endl;
     }
     return shaderID;
 }

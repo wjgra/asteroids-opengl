@@ -93,7 +93,7 @@ void GameState::handleEventsPlay(SDL_Event const& event){
                 case SDL_SCANCODE_UP:
                     ship->thrustForward(true);
                     break;
-                case SDL_SCANCODE_DOWN:
+                case SDL_SCANCODE_SPACE:
                     ship->shootMissile(true);
                     break;
                 // case SDL_SCANCODE_RETURN: // temp - go to score screen
@@ -150,9 +150,11 @@ void GameState::handleEventsMenu(SDL_Event const& event){
                     newGame();
                     screen = Screen::play;
                     break;
+                #ifndef __EMSCRIPTEN__
                 case SDL_SCANCODE_TAB:
                     screen = Screen::quit;
                     break;
+                #endif
                 default:
                     break;
             }
@@ -309,7 +311,9 @@ void GameState::frameMenu(unsigned int frameTime){
     textRen.drawStringCentred("A HOMAGE TO ATARI'S", 16.0f, winWidth/2, winHeight/2-64.0f);
     textRen.drawStringCentred("ASTEROIDS", 64.0f, winWidth/2, winHeight/2-32.0f);
     textRen.drawStringCentred("[ENTER] PLAY GAME", 16.0f, winWidth/2, winHeight/2+64.0f);
+    #ifndef __EMSCRIPTEN__
     textRen.drawStringCentred("[TAB] QUIT", 16.0f, winWidth/2, winHeight/2+96.0f); // Do not display in web version
+    #endif
 }
 
 void GameState::frameScore(unsigned int frameTime){
@@ -353,41 +357,9 @@ bool GameState::checkCollisionFine(const Asteroid& ast, const Ship& sh) const{
     Triangle shipL, shipR, astSeg;
     auto xRot =  [](float x, float y, float angle) {return std::cos(angle) * x - std::sin(angle) * y;};
     auto yRot =  [](float x, float y, float angle) {return std::sin(angle) * x + std::cos(angle) * y;};
-    /*
-    for (int i = 0; i < 3; ++i){
-        // float alpha = sh.orientation;
-        // shipR.points[2*i] = shipScale*(std::cos(alpha)*sh.vertices[2*i]-std::sin(alpha)*sh.vertices[2*i+1]) + sh.posX - ast.posX;
-        // shipR.points[2*i+1] = shipScale*(std::sin(alpha)*sh.vertices[2*i]+std::cos(alpha)*sh.vertices[2*i+1]) + sh.posY - ast.posY;
-        float tempX = shipScale * xRot(sh.vertices[2*i], sh.vertices[2*i+1], sh.orientation) + sh.posX - ast.posX;
-        float tempY = shipScale * yRot(sh.vertices[2*i], sh.vertices[2*i+1], sh.orientation) + sh.posY - ast.posY;
-        shipR.points[2*i] = xRot(tempX, tempY, -ast.orientation);
-        shipR.points[2*i + 1] = yRot(tempX, tempY, -ast.orientation);
-    }
-
-    for (int i = 3; i < 6; ++i){
-        float x = i != 5 ? sh.vertices[2*i] : sh.vertices[0];
-        float y = i != 5 ? sh.vertices[2*i+1] : sh.vertices[1];
-        float tempX = shipScale * xRot(x, y, sh.orientation) + sh.posX - ast.posX;
-        float tempY = shipScale * yRot(x, y, sh.orientation) + sh.posY - ast.posY;
-        shipL.points[2*i] = xRot(tempX, tempY, -ast.orientation);
-        shipL.points[2*i + 1] = yRot(tempX, tempY, -ast.orientation);
-    }
     
-
-    float lastX = ast.vertices.end()[-2]*shipScale, lastY = ast.vertices.end()[-1]*shipScale;
-    float currentX, currentY;   
-
-    for (int i = 0 ; i < ast.vertices.size()/2; ++i){
-        currentX = ast.vertices[2*i]*shipScale;
-        currentY = ast.vertices[2*i+1]*shipScale;
-        astSeg = {0.0f, 0.0f, lastX, lastY, currentX, currentY};
-        lastX = currentX, lastY = currentY;
-        if (trianglesIntersect(shipL, astSeg) || trianglesIntersect(shipR, astSeg)) 
-            return true;
-    }
-    */
-     for (int i = 0; i < 3; ++i){
- shipR.points[2*i] = shipScale * xRot(sh.vertices[2*i], sh.vertices[2*i+1], sh.orientation) + sh.posX;
+    for (int i = 0; i < 3; ++i){
+        shipR.points[2*i] = shipScale * xRot(sh.vertices[2*i], sh.vertices[2*i+1], sh.orientation) + sh.posX;
         shipR.points[2*i + 1] = shipScale * yRot(sh.vertices[2*i], sh.vertices[2*i+1], sh.orientation) + sh.posY;
 
     }
@@ -418,27 +390,27 @@ bool GameState::checkCollisionFine(const Asteroid& ast, const Ship& sh) const{
 bool GameState::pointsLieOnOneSide(Triangle const& tri1, Triangle const& tri2) const{
     // Based on this answer: https://stackoverflow.com/a/44269990
 
-  float dXa = tri1.points[0] - tri2.points[4];
-  float dYa = tri1.points[1] - tri2.points[5];
-  float dXb = tri1.points[2] - tri2.points[4];
-  float dYb = tri1.points[3] - tri2.points[5];
-  float dXc = tri1.points[4] - tri2.points[4];
-  float dYc = tri1.points[5] - tri2.points[5];
-  float dX21 = tri2.points[4] - tri2.points[2];
-  float dY12 = tri2.points[3] - tri2.points[5];
-  float D = dY12 * (tri2.points[0] - tri2.points[4]) + dX21 * (tri2.points[1] - tri2.points[5]);
-  float sa = dY12 * dXa + dX21 * dYa;
-  float sb = dY12 * dXb + dX21 * dYb;
-  float sc = dY12 * dXc + dX21 * dYc;
-  float ta = (tri2.points[5] - tri2.points[1]) * dXa + (tri2.points[0] - tri2.points[4]) * dYa;
-  float tb = (tri2.points[5] - tri2.points[1]) * dXb + (tri2.points[0] - tri2.points[4]) * dYb;
-  float tc = (tri2.points[5] - tri2.points[1]) * dXc + (tri2.points[0] - tri2.points[4]) * dYc;
-  if (D < 0) return ((sa >= 0 && sb >= 0 && sc >= 0) ||
-                     (ta >= 0 && tb >= 0 && tc >= 0) ||
-                     (sa+ta <= D && sb+tb <= D && sc+tc <= D));
-  else return ((sa <= 0 && sb <= 0 && sc <= 0) ||
-          (ta <= 0 && tb <= 0 && tc <= 0) ||
-          (sa+ta >= D && sb+tb >= D && sc+tc >= D));
+    float dXa = tri1.points[0] - tri2.points[4];
+    float dYa = tri1.points[1] - tri2.points[5];
+    float dXb = tri1.points[2] - tri2.points[4];
+    float dYb = tri1.points[3] - tri2.points[5];
+    float dXc = tri1.points[4] - tri2.points[4];
+    float dYc = tri1.points[5] - tri2.points[5];
+    float dX21 = tri2.points[4] - tri2.points[2];
+    float dY12 = tri2.points[3] - tri2.points[5];
+    float D = dY12 * (tri2.points[0] - tri2.points[4]) + dX21 * (tri2.points[1] - tri2.points[5]);
+    float sa = dY12 * dXa + dX21 * dYa;
+    float sb = dY12 * dXb + dX21 * dYb;
+    float sc = dY12 * dXc + dX21 * dYc;
+    float ta = (tri2.points[5] - tri2.points[1]) * dXa + (tri2.points[0] - tri2.points[4]) * dYa;
+    float tb = (tri2.points[5] - tri2.points[1]) * dXb + (tri2.points[0] - tri2.points[4]) * dYb;
+    float tc = (tri2.points[5] - tri2.points[1]) * dXc + (tri2.points[0] - tri2.points[4]) * dYc;
+    if (D < 0) return ((sa >= 0 && sb >= 0 && sc >= 0) ||
+                        (ta >= 0 && tb >= 0 && tc >= 0) ||
+                        (sa+ta <= D && sb+tb <= D && sc+tc <= D));
+    else return ((sa <= 0 && sb <= 0 && sc <= 0) ||
+            (ta <= 0 && tb <= 0 && tc <= 0) ||
+            (sa+ta >= D && sb+tb >= D && sc+tc >= D));
 }
 
 bool GameState::trianglesIntersect(Triangle const& tri1, Triangle const& tri2) const{

@@ -1,7 +1,12 @@
 #ifndef _ASTEROIDS_CONTEXT_HPP_
 #define _ASTEROIDS_CONTEXT_HPP_
 
+#ifdef __EMSCRIPTEN__
+#include <GL/gl.h>
+#include <GLES3/gl3.h>
+#else
 #include "../include/glad/glad.h"
+#endif
 
 #include <iostream>
 

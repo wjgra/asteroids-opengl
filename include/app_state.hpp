@@ -1,12 +1,19 @@
 #ifndef _ASTEROIDS_APP_STATE_HPP_
 #define _ASTEROIDS_APP_STATE_HPP_
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <GL/gl.h>
+#include <GLES3/gl3.h>
+#else
 #include "../include/glad/glad.h"
+#endif
 
 #include <SDL.h>
 #include <SDL_opengl.h>
 
 #include <vector>
+#include <chrono>
 
 #include "../include/window.hpp"
 #include "../include/context.hpp"
@@ -17,10 +24,15 @@ class AppState{
 public:
     AppState(unsigned int scale);
     ~AppState();
+    void beginLoop();
+    void mainLoop();
     void handleEvents(SDL_Event const&  event);
     void frame(unsigned int frameTime);
+    void quitApp();
     // Window/context state parameters
     bool quit = false;
+    SDL_Event event;
+    std::chrono::time_point<std::chrono::high_resolution_clock> tStart, tNow;
     // -- Viewport resolution is winScale * notional dimension
     unsigned int const winScale = 1;
     // -- Dimensions of notional window

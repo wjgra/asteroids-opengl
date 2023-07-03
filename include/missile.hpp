@@ -1,7 +1,7 @@
 #ifndef _ASTEROIDS_MISSILE_HPP_
 #define _ASTEROIDS_MISSILE_HPP_
 
-#include "../include/glad/glad.h"
+//#include "../include/glad/glad.h"
 #include "../include/game_object.hpp"
 
 class Missile : public GameObject{

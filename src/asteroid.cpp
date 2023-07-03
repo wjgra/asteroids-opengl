@@ -7,7 +7,7 @@ Asteroid::Asteroid(float s, float pX, float pY, float dir, unsigned int sz, int 
     size{sz},
     segments{7+3*sz},
     speed{(4-sz)/2.0f},
-    rotPerTimeStep{0.005*rSpeed}
+    rotPerTimeStep{0.005f*rSpeed}
 {
     maxRadius = 1.15*s*(1u << sz)/2.0f;
     velocityX = speed*cos(dir);

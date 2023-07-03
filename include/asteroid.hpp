@@ -1,7 +1,7 @@
 #ifndef _ASTEROIDS_ASTEROID_HPP_
 #define _ASTEROIDS_ASTEROID_HPP_
 
-#include "../include/glad/glad.h"
+//#include "../include/glad/glad.h"
 #include "../include/game_object.hpp"
 
 class Asteroid : public GameObject {

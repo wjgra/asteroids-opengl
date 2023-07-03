@@ -7,9 +7,11 @@ Context::Context(SDL_Window* window, unsigned int width, unsigned int height) : 
         throw "Failed to create OpenGL context";
     }
     std::cout << "OpenGL loaded\n";
-
+    
+    #ifndef __EMSCRIPTEN__
     // Load OpenGL functions with GLAD
     gladLoadGLLoader(SDL_GL_GetProcAddress);
+    #endif
 
     // Display device information
     printf("Vendor:   %s\n", glGetString(GL_VENDOR));
