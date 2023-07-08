@@ -15,8 +15,8 @@ public:
     virtual void beginFrame(unsigned int frameTime) = 0;
     virtual void updateNextPos() = 0;
     void updatePositions();
-    bool toDestroyThisFrame();
-    glm::mat4 getTransMatrix();
+    bool toDestroyThisFrame() const;
+    glm::mat4 getTransMatrix() const;
     virtual void destroy();
     int static const timeStep = 15000; // in microseconds
     int static timeSinceLastUpdate;

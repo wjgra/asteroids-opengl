@@ -7,7 +7,7 @@ GameObject::GameObject(const std::vector<float>& verts, const std::vector<GLuint
     scale{s}, posX{pX}, posY{pY}, orientation{dir}, toBeDestroyed{false}
 {};
 
-bool GameObject::toDestroyThisFrame(){
+bool GameObject::toDestroyThisFrame() const{
     return toBeDestroyed;
 }
 
@@ -42,10 +42,10 @@ void GameObject::updatePositions(){
 
 }
 
-glm::mat4 GameObject::getTransMatrix(){
+glm::mat4 GameObject::getTransMatrix() const{
     // Linearly interpolate position and orientation
     float tInterp = float(GameObject::timeSinceLastUpdate)/float(GameObject::timeStep);
-    
+
     glm::vec3 shipPos = glm::vec3(posX*(1-tInterp)+nextPosX*tInterp,
         posY*(1-tInterp)+nextPosY*tInterp,
         0.0f);

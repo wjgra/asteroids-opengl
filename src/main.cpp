@@ -46,5 +46,4 @@ int main(){
 }
 
 // To do:
-// - Rule of 5 for new classes
 // - Particle effects
