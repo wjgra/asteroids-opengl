@@ -7,6 +7,7 @@ This was a small project that I used to familiarise myself with OpenGL, and a tr
 I have also compiled this project to WASM using [Emscripten](https://emscripten.org/), enabling it to be played online [here](https://wjgrace.co.uk/projects/asteroids/asteroids.html).
 
 ![Asteroids start screen](https://www.wjgrace.co.uk/images/asteroids_thumbnail.gif)
+
 *The start screen*
 
 This was my first non-trivial OpenGL project and so does not have the best program structure. For instance, it would probably be better to batch draw calls for the different objects rather than doing them one at a time. Whilst performance isn't an issue here (due to the low vertex counts and lack of complicated shaders), this could become relevant in more elaborate programs with large numbers of objects. Either way, it was a fun learning experience.
