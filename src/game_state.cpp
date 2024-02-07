@@ -111,7 +111,7 @@ void GameState::handleEventsPlay(SDL_Event const& event){
                 case SDL_SCANCODE_UP:
                     ship->thrustForward(false);
                     break;
-                case SDL_SCANCODE_DOWN:
+                case SDL_SCANCODE_SPACE:
                     ship->shootMissile(false);
                     break;
                 default:
@@ -289,7 +289,7 @@ void GameState::frameMenu(unsigned int frameTime){
     wrapShader.useProgram();
     drawAsteroids();
 
-    textRen.drawStringCentred("A HOMAGE TO ATARI'S", 16.0f, winWidth/2, winHeight/2-64.0f);
+    textRen.drawStringCentred("A TRIBUTE TO ATARI'S", 16.0f, winWidth/2, winHeight/2-64.0f);
     textRen.drawStringCentred("ASTEROIDS", 64.0f, winWidth/2, winHeight/2-32.0f);
     textRen.drawStringCentred("[ENTER] PLAY GAME", 16.0f, winWidth/2, winHeight/2+64.0f);
     #ifndef __EMSCRIPTEN__
